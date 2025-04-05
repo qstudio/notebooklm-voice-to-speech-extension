@@ -42,5 +42,8 @@
       "resources": ["icons/*"],
       "matches": ["https://notebook.google.com/*"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://cdn.gpteng.co; object-src 'self'"
+  }
 }
