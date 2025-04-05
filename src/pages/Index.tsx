@@ -74,7 +74,7 @@ const Index = () => {
       </main>
       
       <footer className="mt-16 text-center text-sm text-muted-foreground">
-        <p>© 2025 Voice Scribe Extension | Privacy Policy</p>
+        <p>© 2025 Alined AI - NotebookLM Voice to Text Extension</p>
       </footer>
     </div>;
 };
