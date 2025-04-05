@@ -13,11 +13,55 @@ function initializeVoiceToText() {
 
 // Watch for changes to detect notebook UI
 function observeForNotebookUI() {
+  console.log('Setting up mutation observer for NotebookLM UI');
+  
   const observer = new MutationObserver((mutations) => {
-    // Check if we can find the notebook UI elements
+    // Debug current DOM structure periodically
+    if (Math.random() < 0.05) { // Only log occasionally to avoid flooding
+      console.log('Current DOM structure:', document.body.innerHTML.substring(0, 200) + '...');
+      console.log('Looking for NotebookLM UI elements...');
+    }
+    
+    // Check for the Add Source button or panel
+    const addSourceButtons = Array.from(document.querySelectorAll('button')).filter(button => {
+      return button.textContent.includes('Add source') || 
+             button.textContent.includes('New source') ||
+             button.textContent.includes('Add material');
+    });
+    
+    // Check for modifying "Paste text" label to "Text"
+    const pasteTextLabels = document.querySelectorAll('span');
+    pasteTextLabels.forEach(label => {
+      if (label.textContent === 'Paste text') {
+        console.log('Found "Paste text" label, changing to "Text"');
+        label.textContent = 'Text';
+      }
+    });
+    
+    // Check for modifying "Copied text" label to "Text or Audio"
+    const copiedTextLabels = document.querySelectorAll('span');
+    copiedTextLabels.forEach(label => {
+      if (label.textContent === 'Copied text') {
+        console.log('Found "Copied text" label, changing to "Text or Audio"');
+        label.textContent = 'Text or Audio';
+      }
+    });
+    
+    // Check for insert button to add "Speak text" button
+    const insertButtons = Array.from(document.querySelectorAll('button')).filter(button => {
+      return button.textContent.includes('Insert');
+    });
+    
+    if (insertButtons.length > 0 && !document.querySelector('.voice-to-text-speak-button')) {
+      console.log('Found Insert button, adding Speak text button');
+      const insertButton = insertButtons[0];
+      addSpeakButton(insertButton);
+    }
+    
+    // Add voice button to source material panel if it exists
     const notebookUI = document.querySelector('[aria-label="Source Materials"]') || 
-                      document.querySelector('[data-testid="source-material-list"]') ||
-                      document.querySelector('[role="complementary"]');
+                       document.querySelector('[data-testid="source-material-list"]') ||
+                       document.querySelector('[role="complementary"]');
     
     if (notebookUI && !document.querySelector('.voice-to-text-button')) {
       console.log('Found NotebookLM UI, injecting voice button');
@@ -29,7 +73,56 @@ function observeForNotebookUI() {
     childList: true,
     subtree: true,
     attributes: true,
+    characterData: true
   });
+}
+
+// Add a "Speak text" button next to the Insert button
+function addSpeakButton(insertButton) {
+  if (!insertButton || document.querySelector('.voice-to-text-speak-button')) {
+    return;
+  }
+  
+  const parentElement = insertButton.parentElement;
+  if (!parentElement) {
+    console.log('Cannot find parent element of Insert button');
+    return;
+  }
+  
+  const speakButton = document.createElement('button');
+  speakButton.className = 'voice-to-text-speak-button';
+  speakButton.style.cssText = `
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    padding: 8px 16px;
+    background-color: #f1f3f4;
+    color: #5f6368;
+    border-radius: 4px;
+    border: none;
+    font-family: 'Google Sans', Arial, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+  `;
+  
+  speakButton.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+      <line x1="12" x2="12" y1="19" y2="22"></line>
+    </svg>
+    Speak text
+  `;
+  
+  speakButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startVoiceRecognition();
+  });
+  
+  // Insert after the insert button
+  insertButton.insertAdjacentElement('afterend', speakButton);
+  console.log('Speak text button added successfully');
 }
 
 // Inject our voice button into the NotebookLM UI
@@ -183,6 +276,8 @@ function createRecorderUI() {
 
 // Add text to the notebook
 function addTextToNotebook(text) {
+  console.log('Attempting to add text to notebook:', text.substring(0, 50) + '...');
+  
   // Look for the add source button
   const addSourceButtons = Array.from(document.querySelectorAll('button')).filter(button => {
     return button.textContent.includes('Add source') || 
@@ -191,6 +286,8 @@ function addTextToNotebook(text) {
   });
   
   if (addSourceButtons.length > 0) {
+    console.log('Found Add source button, clicking it');
+    
     // Click the button to open the add source dialog
     addSourceButtons[0].click();
     
@@ -201,6 +298,8 @@ function addTextToNotebook(text) {
                          document.querySelector('div[role="dialog"] [contenteditable="true"]');
                          
       if (inputField) {
+        console.log('Found input field, adding text');
+        
         // Set the text
         if (inputField.tagName === 'TEXTAREA' || inputField.tagName === 'INPUT') {
           inputField.value = text;
@@ -219,17 +318,21 @@ function addTextToNotebook(text) {
                               );
                               
           if (submitButton) {
+            console.log('Found submit button, clicking it');
             submitButton.click();
             alert('Text added successfully!');
           } else {
+            console.log('Could not find submit button');
             alert('Could not find the submit button. Please add the text manually.');
           }
         }, 500);
       } else {
+        console.log('Could not find input field');
         alert('Could not find the input field. Please add the text manually.');
       }
     }, 500);
   } else {
+    console.log('Could not find Add Source button');
     alert('Could not find the Add Source button. The UI may have changed.');
   }
 }
@@ -241,6 +344,10 @@ style.textContent = `
     background: none;
     border: none;
     cursor: pointer;
+  }
+  
+  .voice-to-text-speak-button:hover {
+    background-color: #e8eaed;
   }
   
   .record-button.recording {
