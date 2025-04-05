@@ -4,7 +4,7 @@
 /**
  * Logs the current DOM structure for debugging
  */
-export function logCurrentDOM() {
+function logCurrentDOM() {
   console.log('Current DOM structure:');
   
   // Log all buttons
@@ -42,23 +42,11 @@ export function logCurrentDOM() {
  * Find add source buttons in the UI
  * @returns {Array} Array of found buttons
  */
-export function findAddSourceButtons() {
-  // First try to find buttons with Angular attributes
-  const ngButtons = Array.from(document.querySelectorAll('button[_ngcontent-ng-c\\d+]'));
-  const ngAddSourceButtons = ngButtons.filter(button => {
-    const buttonText = button.textContent.toLowerCase();
-    return buttonText.includes('add source') || 
-           buttonText.includes('new source') ||
-           buttonText.includes('add material');
-  });
-  
-  if (ngAddSourceButtons.length > 0) {
-    return ngAddSourceButtons;
-  }
-  
-  // Fallback to regular buttons
-  return Array.from(document.querySelectorAll('button')).filter(button => {
-    const buttonText = button.textContent.toLowerCase();
+function findAddSourceButtons() {
+  // First look for buttons with specific text
+  const allButtons = Array.from(document.querySelectorAll('button'));
+  return allButtons.filter(button => {
+    const buttonText = button.textContent.toLowerCase().trim();
     return buttonText.includes('add source') || 
            buttonText.includes('new source') ||
            buttonText.includes('add material');
@@ -69,34 +57,21 @@ export function findAddSourceButtons() {
  * Find the notebook UI element
  * @returns {Element|null} The notebook UI element or null
  */
-export function findNotebookUI() {
+function findNotebookUI() {
   // Try different selectors in order of specificity
   return document.querySelector('[aria-label="Source Materials"]') || 
          document.querySelector('[data-testid="source-material-list"]') ||
          document.querySelector('[role="complementary"]') ||
-         document.querySelector('[_ngcontent-ng-c\\d+][role="complementary"]');
+         document.querySelector('aside');
 }
 
 /**
  * Find the add material dialog
  * @returns {Element|null} The dialog element or null
  */
-export function findAddMaterialDialog() {
-  // Look for Angular-specific dialog first
-  const ngDialogs = document.querySelectorAll('[_ngcontent-ng-c\\d+][role="dialog"]');
-  if (ngDialogs.length > 0) {
-    console.log('Found Angular dialog');
-    return ngDialogs[0];
-  }
-  
-  // Fallback to standard dialog
-  const dialog = document.querySelector('div[role="dialog"]');
-  if (dialog) {
-    console.log('Found standard dialog');
-    return dialog;
-  }
-  
-  return null;
+function findAddMaterialDialog() {
+  // Look for dialog role
+  return document.querySelector('div[role="dialog"]');
 }
 
 /**
@@ -104,27 +79,28 @@ export function findAddMaterialDialog() {
  * @param {Element} dialog - The dialog element
  * @returns {Element|null} The input field or null
  */
-export function findInputField(dialog) {
+function findInputField(dialog) {
   if (!dialog) return null;
   
-  // Look for Angular-specific textarea first
-  const ngTextarea = dialog.querySelector('textarea[_ngcontent-ng-c\\d+]');
-  if (ngTextarea) {
-    console.log('Found Angular textarea');
-    return ngTextarea;
-  }
-  
-  // Then try standard elements
+  // Try to find textarea first (most likely)
   const textarea = dialog.querySelector('textarea');
   if (textarea) {
-    console.log('Found standard textarea');
+    console.log('Found textarea');
     return textarea;
   }
   
+  // Then try contenteditable
   const contentEditable = dialog.querySelector('[contenteditable="true"]');
   if (contentEditable) {
     console.log('Found contenteditable element');
     return contentEditable;
+  }
+  
+  // Then try text input
+  const textInput = dialog.querySelector('input[type="text"]');
+  if (textInput) {
+    console.log('Found text input');
+    return textInput;
   }
   
   console.log('Could not find input field in dialog');
@@ -136,33 +112,49 @@ export function findInputField(dialog) {
  * @param {Element} dialog - The dialog element
  * @returns {Element|null} The submit button or null
  */
-export function findSubmitButton(dialog) {
+function findSubmitButton(dialog) {
   if (!dialog) return null;
   
-  // Look for Angular-specific submit button first
-  const ngButtons = Array.from(dialog.querySelectorAll('button[_ngcontent-ng-c\\d+]'));
-  console.log('Found Angular buttons in dialog:', ngButtons.map(b => b.textContent));
+  // Look for buttons in dialog
+  const dialogButtons = Array.from(dialog.querySelectorAll('button'));
+  console.log('Found buttons in dialog:', dialogButtons.map(b => b.textContent.trim()));
   
-  const ngSubmitButton = ngButtons.find(btn => 
-    btn.textContent.includes('Add') || btn.textContent.includes('Insert')
-  );
+  // First try to find by text content
+  const submitTextPatterns = ['add', 'insert', 'save', 'submit'];
   
-  if (ngSubmitButton) {
-    console.log('Found Angular submit button');
-    return ngSubmitButton;
+  const textMatchButton = dialogButtons.find(btn => {
+    const text = btn.textContent.trim().toLowerCase();
+    return submitTextPatterns.some(pattern => text.includes(pattern));
+  });
+  
+  if (textMatchButton) {
+    console.log('Found submit button by text match');
+    return textMatchButton;
   }
   
-  // Fallback to standard buttons
-  const submitButton = dialog.querySelector('button[type="submit"]') ||
-                       Array.from(dialog.querySelectorAll('button')).find(btn => 
-                         btn.textContent.includes('Add') || btn.textContent.includes('Insert')
-                       );
+  // Then try to find by type attribute
+  const submitTypeButton = dialog.querySelector('button[type="submit"]');
+  if (submitTypeButton) {
+    console.log('Found submit button by type attribute');
+    return submitTypeButton;
+  }
   
-  if (submitButton) {
-    console.log('Found standard submit button');
-    return submitButton;
+  // Fallback to primary/confirm button based on position or style
+  if (dialogButtons.length > 0) {
+    // Usually the rightmost/last button is submit/confirm
+    const lastButton = dialogButtons[dialogButtons.length - 1];
+    console.log('Using last button as submit button fallback');
+    return lastButton;
   }
   
   console.log('Could not find submit button in dialog');
   return null;
 }
+
+// Make all functions globally available
+window.logCurrentDOM = logCurrentDOM;
+window.findAddSourceButtons = findAddSourceButtons;
+window.findNotebookUI = findNotebookUI;
+window.findAddMaterialDialog = findAddMaterialDialog;
+window.findInputField = findInputField;
+window.findSubmitButton = findSubmitButton;

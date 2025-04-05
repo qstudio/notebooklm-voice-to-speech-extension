@@ -1,13 +1,12 @@
 
 // Text insertion functions for Voice to Text for Google NotebookLM
-import { findInputField, findSubmitButton, findAddMaterialDialog, findAddSourceButtons } from '../dom-utils.js';
 
 /**
  * Add text to the notebook
  * @param {string} text - The text to add
  * @returns {void}
  */
-export function addTextToNotebook(text) {
+function addTextToNotebook(text) {
   console.log('Attempting to add text to notebook:', text.substring(0, 50) + '...');
   
   // Look for active dialog first (in case we're already in the add material dialog)
@@ -106,3 +105,6 @@ export function addTextToNotebook(text) {
     alert('Could not find the Add Source button. The UI may have changed.');
   }
 }
+
+// Make function globally available
+window.addTextToNotebook = addTextToNotebook;

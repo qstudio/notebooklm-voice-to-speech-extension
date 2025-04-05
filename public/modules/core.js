@@ -17,12 +17,33 @@
       message: 'Voice to Text initialized successfully!'
     }, '*');
     
-    // Initialize the DOM observer directly instead of using dynamic import
-    if (typeof observeForNotebookUI === 'function') {
-      console.log('DOM Observer function found, initializing');
+    // Wait for all dependencies to be available before initializing
+    // This ensures that all functions are loaded in the global scope
+    checkDependenciesAndInit();
+  }
+  
+  /**
+   * Check if all required dependencies are loaded and initialize
+   */
+  function checkDependenciesAndInit() {
+    console.log('Checking for dependencies...');
+    
+    const requiredFunctions = [
+      'observeForNotebookUI',
+      'addSpeakButton',
+      'injectVoiceButton',
+      'startVoiceRecognition'
+    ];
+    
+    const missingFunctions = requiredFunctions.filter(fn => typeof window[fn] !== 'function');
+    
+    if (missingFunctions.length === 0) {
+      console.log('All dependencies loaded, starting observer');
       observeForNotebookUI();
     } else {
-      console.error('DOM Observer function not found');
+      console.warn('Some dependencies are not loaded yet:', missingFunctions);
+      console.log('Retrying in 500ms...');
+      setTimeout(checkDependenciesAndInit, 500);
     }
   }
   

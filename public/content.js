@@ -10,6 +10,23 @@ style.textContent = `
     background: none;
     border: none;
     cursor: pointer;
+    margin: 8px 0;
+    display: block;
+    width: 100%;
+  }
+  
+  .voice-to-text-speak-button {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    padding: 8px 16px;
+    background-color: #f1f3f4;
+    color: #5f6368;
+    border-radius: 4px;
+    border: none;
+    font-family: 'Google Sans', Arial, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
   }
   
   .voice-to-text-speak-button:hover {
@@ -72,6 +89,23 @@ window.addEventListener('message', function(event) {
     if (event.data.action === 'logMessage') {
       console.log('From injected script:', event.data.message);
     }
+    
+    // Relay messages to background script if needed
+    if (event.data.action === 'relayToBackground') {
+      chrome.runtime.sendMessage(event.data.message)
+        .then(response => {
+          console.log('Background response:', response);
+          // Relay back to page script if needed
+          window.postMessage({
+            type: 'FROM_CONTENT_SCRIPT',
+            action: 'backgroundResponse',
+            data: response
+          }, '*');
+        })
+        .catch(error => {
+          console.error('Error sending message to background:', error);
+        });
+    }
   }
 });
 
@@ -100,21 +134,25 @@ async function injectAllScripts() {
     
     console.log('All scripts injected successfully');
     
-    // Initialize Voice to Text
+    // Ensure initialization is triggered after scripts are loaded
     setTimeout(() => {
       console.log('Initializing Voice to Text...');
       window.postMessage({ 
         type: 'FROM_CONTENT_SCRIPT', 
         action: 'initialize' 
       }, '*');
-    }, 1000); // Increased timeout to ensure all scripts are fully loaded
+    }, 1500); // Increased timeout to ensure all scripts are fully processed
   } catch (error) {
     console.error('Error injecting scripts:', error);
   }
 }
 
-// Start injecting scripts
-injectAllScripts();
+// Start injecting scripts when the DOM is ready
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  injectAllScripts();
+} else {
+  document.addEventListener('DOMContentLoaded', injectAllScripts);
+}
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
