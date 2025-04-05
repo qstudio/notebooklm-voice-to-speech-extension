@@ -22,16 +22,17 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// We'll use a script injection approach instead of ES6 imports
+// We'll use a script injection approach that works with regular scripts, not modules
 function injectScript(file) {
   const script = document.createElement('script');
-  script.setAttribute('type', 'module');
+  // Use type="text/javascript" for regular scripts
+  script.setAttribute('type', 'text/javascript');
   script.setAttribute('src', chrome.runtime.getURL(file));
   document.body.appendChild(script);
   return script;
 }
 
-// Inject our main module script
+// Inject our main script
 const mainScript = injectScript('modules/core.js');
 mainScript.onload = function() {
   // Initialize via window function that our modules will expose

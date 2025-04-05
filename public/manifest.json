@@ -42,12 +42,7 @@
       "resources": [
         "icons/*", 
         "modules/*",
-        "modules/core.js",
-        "modules/dom-utils.js",
-        "modules/ui-components.js", 
-        "modules/text-insertion.js",
-        "modules/voice-recognition.js",
-        "modules/dom-observer.js"
+        "modules/core.js"
       ],
       "matches": ["https://notebooklm.google.com/*"]
     }
