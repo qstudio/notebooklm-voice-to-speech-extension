@@ -58,39 +58,40 @@ function observeForNotebookUI() {
         }
       }
       
-      // Specifically look for the Insert button in the paste-text component
-      // Using a more reliable and specific selector
-      const pasteTextComponents = addMaterialDialog.querySelectorAll('paste-text, [class*="paste-text"], form');
+      // Use the specific selector for the Insert button
+      const insertButton = addMaterialDialog.querySelector('button[mat-flat-button][type="submit"]');
       
-      if (pasteTextComponents.length > 0) {
-        console.log('Found paste text component:', pasteTextComponents[0]);
+      if (insertButton) {
+        console.log('Found Insert button with specific selector:', insertButton);
         
-        // Look for the Insert button within the paste-text component
-        pasteTextComponents.forEach(component => {
-          const insertButton = Array.from(component.querySelectorAll('button')).find(button => {
-            return button.textContent.trim() === 'Insert';
-          });
+        // Check if we've already added our button
+        const speakButtonExists = insertButton.parentElement?.querySelector('.voice-to-text-speak-button');
+        if (!speakButtonExists) {
+          console.log('Adding Speak button next to Insert button');
           
-          if (insertButton) {
-            console.log('Found Insert button in paste-text component:', insertButton);
-            
-            // Check if we've already added our button
-            const speakButtonExists = component.querySelector('.voice-to-text-speak-button');
-            if (!speakButtonExists) {
-              console.log('Adding Speak button next to Insert button');
-              
-              // Add the Speak button with a slight delay to ensure the DOM is stable
-              setTimeout(() => {
-                window.addSpeakButton(insertButton);
-              }, 100);
-            }
-          }
+          // Add the Speak button with a slight delay to ensure the DOM is stable
+          setTimeout(() => {
+            window.addSpeakButton(insertButton);
+          }, 100);
+        }
+      } else {
+        console.log('Insert button not found with specific selector, trying alternative selectors');
+        
+        // Fallback to other selectors if needed
+        const fallbackInsertButton = Array.from(addMaterialDialog.querySelectorAll('button')).find(button => {
+          return button.textContent.trim() === 'Insert';
         });
+        
+        if (fallbackInsertButton && !fallbackInsertButton.parentElement?.querySelector('.voice-to-text-speak-button')) {
+          console.log('Found Insert button with fallback selector:', fallbackInsertButton);
+          setTimeout(() => {
+            window.addSpeakButton(fallbackInsertButton);
+          }, 100);
+        }
       }
     }
     
     // Do NOT add the Voice to Text button in the main interface anymore
-    // We'll focus solely on the dialog Insert button
   });
   
   // Observe all changes to the DOM
@@ -134,10 +135,15 @@ function debugDOMStructure() {
   
   if (dialogs.length > 0) {
     dialogs.forEach(dialog => {
-      const insertButton = Array.from(dialog.querySelectorAll('button')).find(btn => 
-        btn.textContent.trim() === 'Insert');
+      const insertButton = dialog.querySelector('button[mat-flat-button][type="submit"]');
       if (insertButton) {
-        console.log('Found Insert button in dialog:', insertButton);
+        console.log('Found Insert button with specific selector in dialog:', insertButton);
+      } else {
+        const fallbackInsertButton = Array.from(dialog.querySelectorAll('button')).find(btn => 
+          btn.textContent.trim() === 'Insert');
+        if (fallbackInsertButton) {
+          console.log('Found Insert button with fallback in dialog:', fallbackInsertButton);
+        }
       }
       
       // Look for heading elements

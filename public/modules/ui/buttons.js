@@ -26,19 +26,23 @@ function addSpeakButton(insertButton) {
   speakButton.setAttribute('aria-label', 'Speak text');
   speakButton.setAttribute('type', 'button'); // Ensure it's not a submit button
   
-  // Try to copy the styles of the Insert button
+  // Try to copy the styles of the Insert button but make it a secondary button
   try {
     const buttonClasses = Array.from(insertButton.classList);
     
-    // Copy classes but exclude some specific ones
+    // Copy classes but exclude some specific ones that would make it look like a primary button
     const classesToCopy = buttonClasses.filter(cls => 
-      !cls.includes('disabled') && 
       !cls.includes('primary') && 
-      !cls.includes('unelevated')
+      !cls.includes('unelevated') &&
+      !cls.includes('disabled')
     );
     
     speakButton.classList.add(...classesToCopy);
-    speakButton.classList.add('mat-mdc-button-base');
+    
+    // Add Material Design classes if they exist in the original button
+    if (buttonClasses.some(cls => cls.includes('mat-') || cls.includes('mdc-'))) {
+      speakButton.classList.add('mat-mdc-button-base');
+    }
     
     // Force some styling to make it look like a secondary button
     speakButton.style.marginLeft = '8px';
@@ -91,43 +95,39 @@ function addSpeakButton(insertButton) {
     }
   });
   
-  // Insert the button after the Insert button
+  // Insert the button next to the Insert button
   try {
-    // Get the parent of the Insert button
-    const buttonParent = insertButton.parentElement;
-    if (!buttonParent) {
-      throw new Error('Insert button has no parent element');
+    // Find the right place to insert the button
+    if (insertButton.parentElement) {
+      // Insert after the Insert button
+      insertButton.insertAdjacentElement('afterend', speakButton);
+      console.log('Speak text button added successfully after Insert button');
+      return;
     }
-    
-    // Insert directly after the insert button
-    insertButton.insertAdjacentElement('afterend', speakButton);
-    console.log('Speak text button added successfully using insertAdjacentElement');
-    return;
-  } catch (insertError) {
-    console.error('Error inserting button after Insert button:', insertError);
-    
-    // Try to find a form or container element
-    try {
-      const form = insertButton.closest('form');
-      if (form) {
-        form.appendChild(speakButton);
-        console.log('Speak text button added to form');
-        return;
+  } catch (error) {
+    console.error('Error inserting button:', error);
+  }
+  
+  // If the above approach failed, try alternative approaches
+  try {
+    // Try to insert into the form
+    const form = insertButton.closest('form');
+    if (form) {
+      form.appendChild(speakButton);
+      console.log('Speak text button added to form');
+      
+      // Position the button appropriately
+      speakButton.style.marginLeft = '8px';
+      speakButton.style.display = 'inline-flex';
+      
+      // If the insert button is last in the form, adjust positioning
+      const lastChild = Array.from(form.children).pop();
+      if (lastChild === insertButton) {
+        insertButton.style.marginRight = '8px';
       }
-    } catch (formError) {
-      console.error('Error adding button to form:', formError);
     }
-    
-    // Last resort - try to add it to the parent of the parent
-    try {
-      const grandparent = insertButton.parentElement?.parentElement;
-      if (grandparent) {
-        grandparent.appendChild(speakButton);
-        console.log('Speak text button added to grandparent');
-      }
-    } catch (grandparentError) {
-      console.error('Error adding button to grandparent:', grandparentError);
-    }
+  } catch (error) {
+    console.error('Error adding button to form:', error);
   }
 }
 
