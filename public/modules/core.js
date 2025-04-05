@@ -1,8 +1,7 @@
-
 // Core functionality for Voice to Text for Google NotebookLM
 
 // Create a global namespace for our extension
-window.VoiceToTextNLM = window.VoiceToTextNLM || {};
+window.VoiceToTextNLM = {};
 
 /**
  * Main initialization function
@@ -516,7 +515,5 @@ function observeForNotebookUI() {
   });
 }
 
-// Export functions to the global namespace
-window.VoiceToTextNLM = window.VoiceToTextNLM || {};
+// Make sure initialize is exposed to the window object
 window.VoiceToTextNLM.initialize = initializeVoiceToText;
-
