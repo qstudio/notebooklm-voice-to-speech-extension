@@ -21,69 +21,68 @@ function observeForNotebookUI() {
     if (addMaterialDialog) {
       console.log('Found add material dialog:', addMaterialDialog);
       
-      // Look for the "Add source", "Add sources" or "Paste copied text" header to identify dialog type
+      // Look for the "Paste copied text" header
       const dialogHeaders = Array.from(addMaterialDialog.querySelectorAll('h1, h2, h3, h4, h5, h6, div'));
-      const textDialogHeaders = dialogHeaders.filter(header => {
-        const headerText = header.textContent.trim().toLowerCase();
-        return headerText.includes('paste copied text') || 
-               headerText.includes('paste text') || 
-               headerText.includes('copied text');
+      
+      // Target specifically "Paste copied text" headers
+      const pasteTextHeaders = dialogHeaders.filter(header => {
+        const headerText = header.textContent.trim();
+        return headerText === 'Paste copied text' || 
+               headerText === 'Paste text' || 
+               headerText === 'Copied text';
       });
       
-      if (textDialogHeaders.length > 0) {
-        console.log('Found paste text dialog header:', textDialogHeaders[0].textContent);
+      if (pasteTextHeaders.length > 0) {
+        console.log('Found paste text dialog header:', pasteTextHeaders[0].textContent);
         
-        // Try to modify labels with exact text content match
-        textDialogHeaders.forEach(label => {
-          const text = label.textContent.trim();
-          if (text === 'Paste text' || text === 'Copied text' || text === 'Paste copied text') {
-            console.log(`Found "${text}" label, changing to "Text or Speech"`, label);
-            
-            // First try to modify just the text node
-            const childNodes = Array.from(label.childNodes);
-            childNodes.forEach(node => {
-              if (node.nodeType === Node.TEXT_NODE) {
-                if (node.textContent.trim() === text) {
-                  node.textContent = "Text or Speech";
-                }
+        // Change the header text to "Text or Speech"
+        pasteTextHeaders.forEach(header => {
+          // Safely change the text content
+          try {
+            // First try to find just the text node
+            let textNodeFound = false;
+            for (let i = 0; i < header.childNodes.length; i++) {
+              const node = header.childNodes[i];
+              if (node.nodeType === Node.TEXT_NODE && 
+                  (node.textContent.trim() === 'Paste copied text' || 
+                   node.textContent.trim() === 'Paste text' || 
+                   node.textContent.trim() === 'Copied text')) {
+                node.textContent = 'Text or Speech';
+                textNodeFound = true;
+                console.log('Updated header text node to "Text or Speech"');
+                break;
               }
-            });
-            
-            // If that fails, try the safer way (this method preserves child elements)
-            if (label.textContent.trim() !== "Text or Speech") {
-              // Clone children before changing
-              const fragmentClone = document.createDocumentFragment();
-              Array.from(label.childNodes).forEach(child => {
-                if (child.nodeType !== Node.TEXT_NODE) {
-                  fragmentClone.appendChild(child.cloneNode(true));
-                }
-              });
-              
-              // Clear and reset with new text
-              label.textContent = "Text or Speech";
-              label.appendChild(fragmentClone);
             }
+            
+            // If we didn't find a text node, try updating the whole element
+            if (!textNodeFound) {
+              // Save any child elements
+              const childElements = Array.from(header.children);
+              
+              // Update the text
+              header.textContent = 'Text or Speech';
+              
+              // Add back any child elements
+              childElements.forEach(child => header.appendChild(child));
+              console.log('Updated header element to "Text or Speech"');
+            }
+          } catch (error) {
+            console.error('Error updating header text:', error);
           }
         });
       }
       
-      // Find all buttons in the dialog
-      const dialogButtons = Array.from(addMaterialDialog.querySelectorAll('button'));
-      console.log('Dialog buttons:', dialogButtons.map(button => ({
-        text: button.textContent.trim(),
-        classes: button.className
-      })));
-      
-      // Look for Insert/Add buttons with text content
-      const insertButton = dialogButtons.find(button => {
+      // Look for the Insert button specifically
+      const insertButton = Array.from(addMaterialDialog.querySelectorAll('button')).find(button => {
         const buttonText = button.textContent.trim();
-        return buttonText === 'Insert' || buttonText === 'Add';
+        return buttonText === 'Insert';
       });
       
+      // If we found the Insert button and we haven't added our button yet
       if (insertButton && !addMaterialDialog.querySelector('.voice-to-text-speak-button')) {
-        console.log('Found Insert/Add button in dialog, adding Speak text button next to it');
+        console.log('Found Insert button, adding Speak button next to it:', insertButton);
         
-        // Add the speak button with a delay to ensure DOM is stable
+        // Add the button with a slight delay to ensure the DOM is stable
         setTimeout(() => {
           window.addSpeakButton(insertButton);
         }, 100);
@@ -94,6 +93,7 @@ function observeForNotebookUI() {
     window.identifyAndInjectVoiceButton();
   });
   
+  // Observe all changes to the DOM
   observer.observe(document.body, {
     childList: true,
     subtree: true,
@@ -149,6 +149,17 @@ function debugDOMStructure() {
   // Find dialogs
   const dialogs = Array.from(document.querySelectorAll('[role="dialog"]'));
   console.log(`Found ${dialogs.length} dialogs`);
+  
+  // Look for the Insert button in any dialogs
+  if (dialogs.length > 0) {
+    dialogs.forEach(dialog => {
+      const insertButton = Array.from(dialog.querySelectorAll('button')).find(btn => 
+        btn.textContent.trim() === 'Insert');
+      if (insertButton) {
+        console.log('Found Insert button in dialog:', insertButton);
+      }
+    });
+  }
   
   console.log('=== END DOM STRUCTURE DEBUG ===');
 }
