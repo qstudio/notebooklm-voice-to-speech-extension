@@ -1,4 +1,3 @@
-
 // UI manipulation functions for Voice to Text for Google NotebookLM
 import { findInputField, findSubmitButton, findAddMaterialDialog } from './dom-utils.js';
 
@@ -24,7 +23,10 @@ export function createRecorderUI() {
   `;
   
   element.innerHTML = `
-    <h3 style="margin-top: 0; font-size: 16px;">Voice to Text</h3>
+    <h3 style="margin-top: 0; font-size: 16px; display: flex; align-items: center;">
+      <span class="recording-indicator" style="display: none;"></span>
+      Voice to Text
+    </h3>
     <textarea style="width: 100%; height: 120px; margin: 12px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: none;" 
               placeholder="Speak now..."></textarea>
     <div style="display: flex; justify-content: space-between;">
@@ -47,7 +49,8 @@ export function createRecorderUI() {
     textarea: element.querySelector('textarea'),
     recordButton: element.querySelector('.record-button'),
     addButton: element.querySelector('.add-button'),
-    cancelButton: element.querySelector('.cancel-button')
+    cancelButton: element.querySelector('.cancel-button'),
+    recordingIndicator: element.querySelector('.recording-indicator')
   };
 }
 
@@ -249,4 +252,21 @@ export function addTextToNotebook(text) {
       alert('Could not find the Add Source button. The UI may have changed.');
     }
   });
+}
+
+/**
+ * Update the UI to show recording state
+ * @param {Object} recorderUI - The recorder UI elements
+ * @param {boolean} isRecording - Whether recording is active
+ */
+export function updateRecordingState(recorderUI, isRecording) {
+  if (isRecording) {
+    recorderUI.recordButton.textContent = 'Stop Recording';
+    recorderUI.recordButton.classList.add('recording');
+    recorderUI.recordingIndicator.style.display = 'inline-block';
+  } else {
+    recorderUI.recordButton.textContent = 'Start Recording';
+    recorderUI.recordButton.classList.remove('recording');
+    recorderUI.recordingIndicator.style.display = 'none';
+  }
 }

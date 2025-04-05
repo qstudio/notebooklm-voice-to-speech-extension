@@ -1,7 +1,6 @@
 
 // Voice recognition functionality for Google NotebookLM
-import { createRecorderUI } from './ui.js';
-import { addTextToNotebook } from './ui.js';
+import { createRecorderUI, addTextToNotebook, updateRecordingState } from './ui.js';
 
 /**
  * Starts the voice recognition process
@@ -39,8 +38,7 @@ export function startVoiceRecognition() {
     };
     
     recognition.onend = () => {
-      recorderUI.recordButton.textContent = 'Start Recording';
-      recorderUI.recordButton.classList.remove('recording');
+      updateRecordingState(recorderUI, false);
     };
     
     recognition.onerror = (event) => {
@@ -51,19 +49,16 @@ export function startVoiceRecognition() {
     
     // Start recording
     recognition.start();
-    recorderUI.recordButton.textContent = 'Stop Recording';
-    recorderUI.recordButton.classList.add('recording');
+    updateRecordingState(recorderUI, true);
     
     // Set up button handlers
     recorderUI.recordButton.onclick = () => {
       if (recorderUI.recordButton.textContent === 'Stop Recording') {
         recognition.stop();
-        recorderUI.recordButton.textContent = 'Start Recording';
-        recorderUI.recordButton.classList.remove('recording');
+        updateRecordingState(recorderUI, false);
       } else {
         recognition.start();
-        recorderUI.recordButton.textContent = 'Stop Recording';
-        recorderUI.recordButton.classList.add('recording');
+        updateRecordingState(recorderUI, true);
       }
     };
     
@@ -82,3 +77,4 @@ export function startVoiceRecognition() {
     };
   });
 }
+
