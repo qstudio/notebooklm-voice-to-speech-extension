@@ -22,37 +22,100 @@ function createRecorderUI() {
     font-family: 'Google Sans', Arial, sans-serif;
   `;
   
-  element.innerHTML = `
-    <h3 style="margin-top: 0; font-size: 16px; display: flex; align-items: center;">
-      <span class="recording-indicator" style="display: none;"></span>
-      Voice to Text
-    </h3>
-    <textarea style="width: 100%; height: 120px; margin: 12px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: none;" 
-              placeholder="Speak now..."></textarea>
-    <div style="display: flex; justify-content: space-between;">
-      <button class="record-button" style="background: #4285f4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-        Start Recording
-      </button>
-      <div>
-        <button class="cancel-button" style="background: #f1f3f4; color: #5f6368; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 8px;">
-          Cancel
-        </button>
-        <button class="add-button" style="background: #4285f4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-          Add Text
-        </button>
-      </div>
-    </div>
+  // Create header
+  const header = document.createElement('h3');
+  header.style.marginTop = '0';
+  header.style.fontSize = '16px';
+  header.style.display = 'flex';
+  header.style.alignItems = 'center';
+  
+  const recordingIndicator = document.createElement('span');
+  recordingIndicator.className = 'recording-indicator';
+  recordingIndicator.style.display = 'none';
+  
+  header.appendChild(recordingIndicator);
+  header.appendChild(document.createTextNode('Voice to Text'));
+  
+  // Create textarea
+  const textarea = document.createElement('textarea');
+  textarea.style.width = '100%';
+  textarea.style.height = '120px';
+  textarea.style.margin = '12px 0';
+  textarea.style.padding = '8px';
+  textarea.style.border = '1px solid #ddd';
+  textarea.style.borderRadius = '4px';
+  textarea.style.resize = 'none';
+  textarea.setAttribute('placeholder', 'Speak now...');
+  
+  // Create buttons container
+  const buttonsContainer = document.createElement('div');
+  buttonsContainer.style.display = 'flex';
+  buttonsContainer.style.justifyContent = 'space-between';
+  
+  // Create record button
+  const recordButton = document.createElement('button');
+  recordButton.className = 'record-button';
+  recordButton.style.cssText = `
+    background: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
   `;
+  recordButton.textContent = 'Start Recording';
+  
+  // Create right buttons container
+  const rightButtonsContainer = document.createElement('div');
+  
+  // Create cancel button
+  const cancelButton = document.createElement('button');
+  cancelButton.className = 'cancel-button';
+  cancelButton.style.cssText = `
+    background: #f1f3f4;
+    color: #5f6368;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+  `;
+  cancelButton.textContent = 'Cancel';
+  
+  // Create add button
+  const addButton = document.createElement('button');
+  addButton.className = 'add-button';
+  addButton.style.cssText = `
+    background: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  `;
+  addButton.textContent = 'Add Text';
+  
+  // Assemble all elements
+  rightButtonsContainer.appendChild(cancelButton);
+  rightButtonsContainer.appendChild(addButton);
+  
+  buttonsContainer.appendChild(recordButton);
+  buttonsContainer.appendChild(rightButtonsContainer);
+  
+  element.appendChild(header);
+  element.appendChild(textarea);
+  element.appendChild(buttonsContainer);
   
   return {
     element: element,
-    textarea: element.querySelector('textarea'),
-    recordButton: element.querySelector('.record-button'),
-    addButton: element.querySelector('.add-button'),
-    cancelButton: element.querySelector('.cancel-button'),
-    recordingIndicator: element.querySelector('.recording-indicator')
+    textarea: textarea,
+    recordButton: recordButton,
+    addButton: addButton,
+    cancelButton: cancelButton,
+    recordingIndicator: recordingIndicator
   };
 }
 
 // Make function globally available
 window.createRecorderUI = createRecorderUI;
+
