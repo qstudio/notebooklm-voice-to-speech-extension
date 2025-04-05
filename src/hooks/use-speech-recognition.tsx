@@ -133,6 +133,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       try {
         // Reset any previous errors
         setError(null);
+        // Reset transcript when starting new recording
+        setTranscript('');
         
         // Set language if provided
         if (language) {
@@ -170,5 +172,3 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     error
   };
 };
-
-// Remove the conflicting global declarations since they're already defined in chrome.d.ts

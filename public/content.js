@@ -1,4 +1,3 @@
-
 // Voice Scribe for Google Notebook - Content Script
 console.log("Voice Scribe for Google Notebook extension loaded");
 
@@ -8,11 +7,22 @@ let recorderElement = null;
 let recognition = null;
 let isRecording = false;
 let lastInsertedText = "";
+let recordButton = null;
 
 // Function to observe DOM changes and detect when we're in Google NotebookLM
 const observeForNotebook = () => {
   // Watch for changes to the DOM to detect when we're in a Google Notebook
   const observer = new MutationObserver((mutations) => {
+    // Look for the paste dialog with the Insert button
+    const pasteDialog = document.querySelector('div[role="dialog"] form');
+    const insertButton = document.querySelector('div[role="dialog"] button[type="submit"]');
+    
+    if (pasteDialog && insertButton && !document.querySelector('.voice-scribe-speak-button')) {
+      console.log("Found NotebookLM paste dialog, injecting Speak button");
+      injectSpeakButton(insertButton);
+    }
+    
+    // Also keep the original source material section detection for the floating button
     if (!document.querySelector('.voice-scribe-button')) {
       // Look for possible source material sections
       const possibleTargets = [
@@ -49,6 +59,163 @@ const observeForNotebook = () => {
     subtree: true,
     attributes: true,
   });
+};
+
+// Function to inject our speak button next to the Insert button
+const injectSpeakButton = (insertButton) => {
+  if (!insertButton || document.querySelector('.voice-scribe-speak-button')) {
+    return; // Don't inject twice
+  }
+
+  console.log("Injecting Speak button next to Insert button");
+
+  // Get the parent container that holds the Insert button
+  const buttonContainer = insertButton.parentElement;
+  
+  // Create speak button element - match the Insert button styling
+  const speakButton = document.createElement('button');
+  speakButton.className = 'voice-scribe-speak-button';
+  speakButton.setAttribute('type', 'button'); // Important: type="button" prevents form submission
+  speakButton.setAttribute('title', 'Add text with voice');
+  
+  // Copy styles from the Insert button
+  const insertButtonStyles = window.getComputedStyle(insertButton);
+  const buttonClasses = insertButton.getAttribute('class');
+  if (buttonClasses) {
+    speakButton.setAttribute('class', `${buttonClasses} voice-scribe-speak-button`);
+  }
+  
+  // Set the inner content
+  speakButton.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" x2="12" y1="19" y2="22"></line>
+      </svg>
+      <span>Speak</span>
+    </div>
+  `;
+  
+  // Insert the speak button before the Insert button
+  buttonContainer.insertBefore(speakButton, insertButton);
+  
+  // Add click event to start voice recording
+  speakButton.addEventListener('click', () => {
+    // Get the textarea in the dialog
+    const textarea = document.querySelector('div[role="dialog"] textarea');
+    if (textarea) {
+      startInlineRecording(textarea, speakButton);
+    } else {
+      console.error("Cannot find textarea in the dialog");
+    }
+  });
+  
+  console.log("Speak button injected successfully");
+};
+
+// Function to start recording directly into the textarea
+const startInlineRecording = (textarea, button) => {
+  if (isRecording) {
+    stopInlineRecording();
+    return;
+  }
+  
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showNotification('Speech recognition is not supported in your browser. Try using Chrome.');
+    return;
+  }
+  
+  try {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    // Get the user's language from settings, or default to en-US
+    chrome.storage.local.get(['voiceScribeSettings'], (result) => {
+      const settings = result.voiceScribeSettings || {};
+      recognition.lang = settings.language || 'en-US';
+      
+      // Save original content
+      const originalContent = textarea.value;
+      
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        
+        // Update the textarea with transcribed text
+        textarea.value = originalContent + transcript;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+    });
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      showNotification(`Speech recognition error: ${event.error}`);
+      stopInlineRecording();
+    };
+    
+    recognition.onend = () => {
+      stopInlineRecording();
+    };
+    
+    // Save reference to button
+    recordButton = button;
+    
+    // Change button text and style to indicate recording
+    button.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+        </svg>
+        <span>Stop</span>
+      </div>
+    `;
+    button.classList.add('recording');
+    
+    // Start recording
+    recognition.start();
+    isRecording = true;
+    
+    // Show a notification
+    showNotification('Voice recording started. Speak now...');
+    
+  } catch (error) {
+    console.error('Error starting speech recognition:', error);
+    showNotification('Failed to start speech recognition. Please try again.');
+  }
+};
+
+// Function to stop inline recording
+const stopInlineRecording = () => {
+  if (recognition) {
+    recognition.stop();
+    recognition = null;
+  }
+  
+  isRecording = false;
+  
+  // Restore button text and style
+  if (recordButton) {
+    recordButton.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" x2="12" y1="19" y2="22"></line>
+        </svg>
+        <span>Speak</span>
+      </div>
+    `;
+    recordButton.classList.remove('recording');
+    recordButton = null;
+  }
+  
+  // Show a notification
+  showNotification('Voice recording stopped');
 };
 
 // Function to inject our voice button into the Google Notebook UI
@@ -440,6 +607,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   
+  if (request.action === "stopRecording" && isRecording) {
+    stopInlineRecording();
+    sendResponse({ status: "stopped" });
+    return true;
+  }
+  
   return false;
 });
 
@@ -457,6 +630,15 @@ style.textContent = `
 
   .voice-scribe-button:hover {
     transform: scale(1.05);
+  }
+
+  .voice-scribe-speak-button {
+    margin-right: 8px;
+  }
+
+  .voice-scribe-speak-button.recording {
+    background-color: #d93025 !important;
+    animation: pulse 1.5s infinite;
   }
 
   .voice-record-btn.recording {

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Check, X, Clipboard, ClipboardCheck, AlertCircle } from 'lucide-react';
+import { Mic, MicOff, Check, X, Clipboard, ClipboardCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
