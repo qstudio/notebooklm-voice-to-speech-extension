@@ -22,6 +22,21 @@ export function addSpeakButton(insertButton) {
   const speakButton = document.createElement('button');
   speakButton.className = 'voice-to-text-speak-button';
   speakButton.setAttribute('aria-label', 'Speak text');
+  
+  // Try to copy attributes from the original button to match styling
+  try {
+    // Copy Angular attributes if they exist
+    const ngAttributes = Array.from(insertButton.attributes)
+      .filter(attr => attr.name.startsWith('_ng') || attr.name.startsWith('ng-'));
+    
+    ngAttributes.forEach(attr => {
+      speakButton.setAttribute(attr.name, attr.value);
+    });
+  } catch (error) {
+    console.error('Error copying Angular attributes:', error);
+  }
+  
+  // Fallback styling
   speakButton.style.cssText = `
     display: inline-flex;
     align-items: center;
@@ -59,8 +74,20 @@ export function addSpeakButton(insertButton) {
   });
   
   // Insert after the insert button
-  insertButton.insertAdjacentElement('afterend', speakButton);
-  console.log('Speak text button added successfully');
+  try {
+    insertButton.insertAdjacentElement('afterend', speakButton);
+    console.log('Speak text button added successfully');
+  } catch (error) {
+    console.error('Error adding speak button:', error);
+    
+    // Alternative method: add to parent
+    try {
+      parentElement.appendChild(speakButton);
+      console.log('Speak text button added to parent successfully');
+    } catch (error2) {
+      console.error('Error adding speak button to parent:', error2);
+    }
+  }
 }
 
 /**
@@ -69,9 +96,27 @@ export function addSpeakButton(insertButton) {
  * @returns {void}
  */
 export function injectVoiceButton(targetElement) {
+  // Don't add if already exists
+  if (document.querySelector('.voice-to-text-button')) {
+    return;
+  }
+  
   // Create a button element
   const voiceButton = document.createElement('button');
   voiceButton.className = 'voice-to-text-button';
+  
+  // Try to copy Angular attributes if they exist
+  try {
+    const ngAttributes = Array.from(targetElement.attributes)
+      .filter(attr => attr.name.startsWith('_ng') || attr.name.startsWith('ng-'));
+    
+    ngAttributes.forEach(attr => {
+      voiceButton.setAttribute(attr.name, attr.value);
+    });
+  } catch (error) {
+    console.error('Error copying Angular attributes:', error);
+  }
+  
   voiceButton.innerHTML = `
     <span style="display: flex; align-items: center; padding: 8px 12px; border-radius: 4px; background: #f1f3f4; margin: 8px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
@@ -96,6 +141,19 @@ export function injectVoiceButton(targetElement) {
   });
   
   // Add to page
-  targetElement.appendChild(voiceButton);
-  console.log('Voice button injected successfully');
+  try {
+    targetElement.appendChild(voiceButton);
+    console.log('Voice button injected successfully');
+  } catch (error) {
+    console.error('Error injecting voice button:', error);
+    
+    // Try to find a better insertion point
+    try {
+      const insertionPoint = targetElement.querySelector('div') || targetElement;
+      insertionPoint.appendChild(voiceButton);
+      console.log('Voice button injected into alternative element successfully');
+    } catch (error2) {
+      console.error('Failed to inject voice button at alternative position:', error2);
+    }
+  }
 }

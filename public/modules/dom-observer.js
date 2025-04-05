@@ -23,9 +23,13 @@ export function observeForNotebookUI() {
     if (addMaterialDialog) {
       console.log('Found add material dialog:', addMaterialDialog);
       
+      // Use Angular-specific selectors for the labels
       // Check for modifying "Paste text" label to "Text"
-      const pasteTextLabels = addMaterialDialog.querySelectorAll('span, label, div');
+      const pasteTextLabels = addMaterialDialog.querySelectorAll('span[_ngcontent-ng-c\\d+], label[_ngcontent-ng-c\\d+], div[_ngcontent-ng-c\\d+]');
       pasteTextLabels.forEach(label => {
+        // Log each label to debug
+        console.log('Checking label:', label.textContent);
+        
         if (label.textContent === 'Paste text') {
           console.log('Found "Paste text" label, changing to "Text"');
           label.textContent = 'Text';
@@ -37,15 +41,33 @@ export function observeForNotebookUI() {
       });
       
       // Look for insert button to add "Speak text" button
-      const dialogButtons = Array.from(addMaterialDialog.querySelectorAll('button'));
-      const insertButton = dialogButtons.find(button => 
-        button.textContent.includes('Insert') || 
-        button.textContent.includes('Add')
-      );
-      
-      if (insertButton && !addMaterialDialog.querySelector('.voice-to-text-speak-button')) {
-        console.log('Found Insert/Add button in dialog, adding Speak text button', insertButton);
-        addSpeakButton(insertButton);
+      if (!addMaterialDialog.querySelector('.voice-to-text-speak-button')) {
+        // Try to find the Insert/Add button using Angular attributes
+        const dialogButtons = Array.from(addMaterialDialog.querySelectorAll('button[_ngcontent-ng-c\\d+]'));
+        console.log('Found dialog buttons:', dialogButtons.map(b => b.textContent));
+        
+        const insertButton = dialogButtons.find(button => 
+          button.textContent.includes('Insert') || 
+          button.textContent.includes('Add')
+        );
+        
+        if (insertButton) {
+          console.log('Found Insert/Add button in dialog, adding Speak text button', insertButton);
+          addSpeakButton(insertButton);
+        } else {
+          // Fallback to find any button that might be the insert button
+          console.log('Could not find Insert/Add button with Angular attributes, trying alternative selectors');
+          const fallbackButtons = Array.from(addMaterialDialog.querySelectorAll('button'));
+          const fallbackInsertButton = fallbackButtons.find(button => 
+            button.textContent.includes('Insert') || 
+            button.textContent.includes('Add')
+          );
+          
+          if (fallbackInsertButton) {
+            console.log('Found Insert/Add button with fallback method, adding Speak text button', fallbackInsertButton);
+            addSpeakButton(fallbackInsertButton);
+          }
+        }
       }
     }
     
