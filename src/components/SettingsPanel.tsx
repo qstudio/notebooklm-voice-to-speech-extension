@@ -2,38 +2,29 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
-import { Settings, Languages, RefreshCw } from 'lucide-react';
-
-// Language options for speech recognition
-const LANGUAGE_OPTIONS = [
-  { value: 'en-US', label: 'English (US)' },
-  { value: 'en-GB', label: 'English (UK)' },
-  { value: 'es-ES', label: 'Spanish' },
-  { value: 'fr-FR', label: 'French' },
-  { value: 'de-DE', label: 'German' },
-  { value: 'it-IT', label: 'Italian' },
-  { value: 'pt-BR', label: 'Portuguese (Brazil)' },
-  { value: 'zh-CN', label: 'Chinese (Simplified)' },
-  { value: 'ja-JP', label: 'Japanese' },
-  { value: 'ko-KR', label: 'Korean' },
-  { value: 'hi-IN', label: 'Hindi' },
-  { value: 'ru-RU', label: 'Russian' }
-];
+import { Settings, RefreshCw } from 'lucide-react';
+import LanguageSelector from '@/components/settings/LanguageSelector';
+import FeatureToggles from '@/components/settings/FeatureToggles';
 
 interface SettingsPanelProps {
   onSettingsChange?: (settings: any) => void;
 }
 
+interface SettingsState {
+  language: string;
+  autoInsert: boolean;
+  confirmBeforeAdd: boolean;
+}
+
+const defaultSettings: SettingsState = {
+  language: 'en-US',
+  autoInsert: false,
+  confirmBeforeAdd: true
+};
+
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
-  const [settings, setSettings] = useState({
-    language: 'en-US',
-    autoInsert: false,
-    confirmBeforeAdd: true
-  });
+  const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -80,12 +71,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
   };
 
   const resetSettings = () => {
-    const defaultSettings = {
-      language: 'en-US',
-      autoInsert: false,
-      confirmBeforeAdd: true
-    };
-    
     setSettings(defaultSettings);
     
     if (typeof window !== 'undefined' && 'chrome' in window && window.chrome.runtime) {
@@ -139,62 +124,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="language" className="flex items-center gap-1">
-              <Languages className="h-4 w-4" /> Recognition Language
-            </Label>
-          </div>
-          <Select 
-            value={settings.language} 
-            onValueChange={(value) => handleSettingChange('language', value)}
-          >
-            <SelectTrigger id="language">
-              <SelectValue placeholder="Select language" />
-            </SelectTrigger>
-            <SelectContent>
-              {LANGUAGE_OPTIONS.map(lang => (
-                <SelectItem key={lang.value} value={lang.value}>
-                  {lang.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground mt-1">
-            The language used for speech recognition.
-          </p>
-        </div>
+        <LanguageSelector 
+          value={settings.language} 
+          onChange={(value) => handleSettingChange('language', value)}
+        />
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="auto-insert" className="cursor-pointer">
-              Auto-insert after speaking
-            </Label>
-            <Switch 
-              id="auto-insert" 
-              checked={settings.autoInsert}
-              onCheckedChange={(checked) => handleSettingChange('autoInsert', checked)}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Automatically insert text when you stop speaking.
-          </p>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="confirm-add" className="cursor-pointer">
-              Confirm before adding
-            </Label>
-            <Switch 
-              id="confirm-add" 
-              checked={settings.confirmBeforeAdd}
-              onCheckedChange={(checked) => handleSettingChange('confirmBeforeAdd', checked)}
-              disabled={!settings.autoInsert}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Ask for confirmation before automatically adding text.
-          </p>
-        </div>
+        <FeatureToggles 
+          autoInsert={settings.autoInsert}
+          confirmBeforeAdd={settings.confirmBeforeAdd}
+          onAutoInsertChange={(checked) => handleSettingChange('autoInsert', checked)}
+          onConfirmBeforeAddChange={(checked) => handleSettingChange('confirmBeforeAdd', checked)}
+        />
       </CardContent>
       <CardFooter className="justify-between border-t pt-4">
         <Button 
