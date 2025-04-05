@@ -57,7 +57,7 @@ export function findAddMaterialDialog() {
 }
 
 /**
- * Find text input field in dialog
+ * Find input field in dialog
  * @param {Element} dialog - The dialog element
  * @returns {Element|null} The input field or null
  */

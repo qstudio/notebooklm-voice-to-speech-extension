@@ -25,7 +25,7 @@ document.head.appendChild(style);
 // We'll use a script injection approach instead of ES6 imports
 function injectScript(file) {
   const script = document.createElement('script');
-  script.setAttribute('type', 'text/javascript');
+  script.setAttribute('type', 'module');
   script.setAttribute('src', chrome.runtime.getURL(file));
   document.body.appendChild(script);
   return script;
