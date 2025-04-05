@@ -1,4 +1,3 @@
-
 // Button creation and injection for Voice to Text for Google NotebookLM
 
 /**
@@ -50,7 +49,7 @@ export function addSpeakButton(insertButton) {
     e.stopPropagation();
     console.log('Speak text button clicked');
     // Import startVoiceRecognition dynamically to avoid circular dependencies
-    import('../voice.js').then(module => {
+    import('../voice/index.js').then(module => {
       module.startVoiceRecognition();
     });
   });
@@ -84,7 +83,7 @@ export function injectVoiceButton(targetElement) {
   voiceButton.addEventListener('click', () => {
     console.log('Voice to Text button clicked');
     // Import startVoiceRecognition dynamically to avoid circular dependencies
-    import('../voice.js').then(module => {
+    import('../voice/index.js').then(module => {
       module.startVoiceRecognition();
     });
   });
