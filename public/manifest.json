@@ -11,7 +11,7 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://notebook.google.com/*"
+    "https://notebooklm.google.com/*"
   ],
   "action": {
     "default_popup": "index.html",
@@ -28,7 +28,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://notebook.google.com/*"],
+      "matches": ["https://notebooklm.google.com/*"],
       "js": ["content.js"],
       "css": ["content.css"]
     }
@@ -40,7 +40,7 @@
   "web_accessible_resources": [
     {
       "resources": ["icons/*"],
-      "matches": ["https://notebook.google.com/*"]
+      "matches": ["https://notebooklm.google.com/*"]
     }
   ],
   "content_security_policy": {
