@@ -27,57 +27,61 @@ function addSpeakButton(insertButton) {
   console.log('Adding Speak text button next to:', insertButton);
   
   const speakButton = document.createElement('button');
-  speakButton.className = 'voice-to-text-speak-button';
+  speakButton.className = 'voice-to-text-speak-button mdc-button mat-mdc-button-base';
   speakButton.setAttribute('aria-label', 'Speak text');
   speakButton.setAttribute('type', 'button'); // Ensure it's not a submit button
   
-  // Match the insert button's styling as closely as possible
+  // Try to match the Insert button's styling as closely as possible
   try {
-    // Copy class names that are likely for styling
+    // Copy class names that are likely for styling but avoid primary/submit classes
     const classesToCopy = Array.from(insertButton.classList)
-      .filter(cls => !cls.includes('primary') && !cls.includes('submit'));
+      .filter(cls => !cls.includes('primary') && !cls.includes('submit') && !cls.includes('disabled'));
     
     speakButton.classList.add(...classesToCopy);
     
-    // Copy inline styles
-    speakButton.style.cssText = window.getComputedStyle(insertButton).cssText;
-    
     // Force button styling overrides
     speakButton.style.marginLeft = '8px';
+    speakButton.style.backgroundColor = '#f1f3f4';
+    speakButton.style.color = '#5f6368';
   } catch (error) {
     console.error('Error copying button styles:', error);
   }
   
-  // Fallback styling
-  speakButton.style.cssText += `
-    display: inline-flex;
-    align-items: center;
-    margin-left: 8px;
-    padding: 8px 16px;
-    background-color: #f1f3f4;
-    color: #5f6368;
-    border-radius: 4px;
-    border: none;
-    font-family: 'Google Sans', Arial, sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-  `;
-  
   // Create button content using DOM methods
+  const buttonLabel = document.createElement('span');
+  buttonLabel.className = 'mdc-button__label';
+  
+  // Create mic icon
   const micIcon = window.createSvgElement("M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19L12 22");
   micIcon.style.marginRight = "8px";
+  micIcon.style.width = "16px";
+  micIcon.style.height = "16px";
   
+  // Add text to label
   const buttonText = document.createTextNode("Speak text");
   
+  // Assemble the button
+  buttonLabel.appendChild(buttonText);
   speakButton.appendChild(micIcon);
-  speakButton.appendChild(buttonText);
+  speakButton.appendChild(buttonLabel);
   
+  // Add persistent ripple span to match Material Design
+  const rippleSpan = document.createElement('span');
+  rippleSpan.className = 'mat-mdc-button-persistent-ripple mdc-button__ripple';
+  speakButton.insertBefore(rippleSpan, speakButton.firstChild);
+  
+  // Add focus indicator
+  const focusIndicator = document.createElement('span');
+  focusIndicator.className = 'mat-focus-indicator';
+  speakButton.appendChild(focusIndicator);
+  
+  // Add click event listener
   speakButton.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     console.log('Speak text button clicked');
     
-    // Call startVoiceRecognition directly if available
+    // Call startVoiceRecognition with window scope
     if (typeof window.startVoiceRecognition === 'function') {
       window.startVoiceRecognition();
     } else {
@@ -86,9 +90,14 @@ function addSpeakButton(insertButton) {
     }
   });
   
-  // Try multiple insertion methods
+  // Try multiple insertion methods to ensure the button appears in the right place
   try {
-    // Method 1: Insert after the insert button
+    // Try to find the parent container that holds the buttons
+    const buttonsContainer = parentElement.closest('.dialog-actions') || 
+                             parentElement.closest('[mat-dialog-actions]') ||
+                             parentElement;
+    
+    // Insert directly after the insert button
     insertButton.insertAdjacentElement('afterend', speakButton);
     console.log('Speak text button added successfully using insertAdjacentElement');
   } catch (error) {

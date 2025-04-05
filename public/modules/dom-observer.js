@@ -21,75 +21,77 @@ function observeForNotebookUI() {
     if (addMaterialDialog) {
       console.log('Found add material dialog:', addMaterialDialog);
       
-      // Look for the "Paste copied text" header
-      const dialogHeaders = Array.from(addMaterialDialog.querySelectorAll('h1, h2, h3, h4, h5, h6, div'));
+      // Target the specific header to change
+      const headers = addMaterialDialog.querySelectorAll('h1, h2, h3, h4, h5, h6, div');
       
-      // Target specifically "Paste copied text" headers
-      const pasteTextHeaders = dialogHeaders.filter(header => {
+      // Find the "Paste copied text" header specifically
+      const pasteTextHeader = Array.from(headers).find(header => {
         const headerText = header.textContent.trim();
         return headerText === 'Paste copied text' || 
                headerText === 'Paste text' || 
-               headerText === 'Copied text';
+               headerText.includes('Copied text');
       });
       
-      if (pasteTextHeaders.length > 0) {
-        console.log('Found paste text dialog header:', pasteTextHeaders[0].textContent);
+      if (pasteTextHeader) {
+        console.log('Found paste text header:', pasteTextHeader.textContent);
         
-        // Change the header text to "Text or Speech"
-        pasteTextHeaders.forEach(header => {
-          // Safely change the text content
-          try {
-            // First try to find just the text node
-            let textNodeFound = false;
-            for (let i = 0; i < header.childNodes.length; i++) {
-              const node = header.childNodes[i];
-              if (node.nodeType === Node.TEXT_NODE && 
-                  (node.textContent.trim() === 'Paste copied text' || 
-                   node.textContent.trim() === 'Paste text' || 
-                   node.textContent.trim() === 'Copied text')) {
-                node.textContent = 'Text or Speech';
-                textNodeFound = true;
-                console.log('Updated header text node to "Text or Speech"');
-                break;
-              }
+        // Check if we've already modified it
+        if (pasteTextHeader.textContent.trim() !== 'Text or Speech') {
+          // Replace the text content directly
+          const originalText = pasteTextHeader.textContent;
+          console.log('Changing header from:', originalText, 'to: Text or Speech');
+          
+          // First try to find just the text node to modify
+          let textNodeFound = false;
+          for (let i = 0; i < pasteTextHeader.childNodes.length; i++) {
+            const node = pasteTextHeader.childNodes[i];
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
+              node.textContent = 'Text or Speech';
+              textNodeFound = true;
+              console.log('Successfully changed header text node to "Text or Speech"');
+              break;
             }
-            
-            // If we didn't find a text node, try updating the whole element
-            if (!textNodeFound) {
-              // Save any child elements
-              const childElements = Array.from(header.children);
-              
-              // Update the text
-              header.textContent = 'Text or Speech';
-              
-              // Add back any child elements
-              childElements.forEach(child => header.appendChild(child));
-              console.log('Updated header element to "Text or Speech"');
-            }
-          } catch (error) {
-            console.error('Error updating header text:', error);
           }
-        });
+          
+          // If no direct text node, replace the entire text
+          if (!textNodeFound) {
+            // Save any child elements
+            const childElements = Array.from(pasteTextHeader.children);
+            
+            // Replace the text content
+            pasteTextHeader.textContent = 'Text or Speech';
+            
+            // Re-add any child elements
+            childElements.forEach(child => pasteTextHeader.appendChild(child));
+            console.log('Successfully changed header element to "Text or Speech"');
+          }
+        }
       }
       
-      // Look for the Insert button specifically
+      // Look for the Insert button directly within the dialog using the exact attributes
       const insertButton = Array.from(addMaterialDialog.querySelectorAll('button')).find(button => {
+        // Match by exact text content
         const buttonText = button.textContent.trim();
         return buttonText === 'Insert';
       });
-      
-      // If we found the Insert button and we haven't added our button yet
-      if (insertButton && !addMaterialDialog.querySelector('.voice-to-text-speak-button')) {
-        console.log('Found Insert button, adding Speak button next to it:', insertButton);
+
+      if (insertButton) {
+        console.log('Found Insert button in dialog:', insertButton);
         
-        // Add the button with a slight delay to ensure the DOM is stable
-        setTimeout(() => {
-          window.addSpeakButton(insertButton);
-        }, 100);
+        // Make sure we haven't already added our button
+        const speakButtonExists = addMaterialDialog.querySelector('.voice-to-text-speak-button');
+        if (!speakButtonExists) {
+          console.log('Adding Speak button next to Insert button');
+          
+          // Add the Speak button with a slight delay to ensure the DOM is stable
+          setTimeout(() => {
+            window.addSpeakButton(insertButton);
+          }, 100);
+        }
       }
     }
     
-    // Enhance button targeting for the main source panel
+    // Continue checking for UI elements in the main interface
     window.identifyAndInjectVoiceButton();
   });
   
