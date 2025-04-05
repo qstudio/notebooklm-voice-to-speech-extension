@@ -78,8 +78,8 @@ function addSpeakButton(insertButton) {
     console.log('Speak text button clicked');
     
     // Call startVoiceRecognition directly if available
-    if (typeof startVoiceRecognition === 'function') {
-      startVoiceRecognition();
+    if (typeof window.startVoiceRecognition === 'function') {
+      window.startVoiceRecognition();
     } else {
       console.error('Voice recognition function not available');
       alert('Could not start voice recognition. Please try again.');
@@ -164,8 +164,8 @@ function injectVoiceButton(targetElement) {
     console.log('Voice to Text button clicked');
     
     // Call startVoiceRecognition directly if available
-    if (typeof startVoiceRecognition === 'function') {
-      startVoiceRecognition();
+    if (typeof window.startVoiceRecognition === 'function') {
+      window.startVoiceRecognition();
     } else {
       console.error('Voice recognition function not available');
       alert('Could not start voice recognition. Please try again.');

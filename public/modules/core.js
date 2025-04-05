@@ -39,7 +39,7 @@
     
     if (missingFunctions.length === 0) {
       console.log('All dependencies loaded, starting observer');
-      observeForNotebookUI();
+      window.observeForNotebookUI();
     } else {
       console.warn('Some dependencies are not loaded yet:', missingFunctions);
       console.log('Retrying in 500ms...');

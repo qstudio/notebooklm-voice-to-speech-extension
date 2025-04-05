@@ -1,12 +1,11 @@
 
 // Recorder dialog UI for Voice to Text for Google NotebookLM
-import { updateRecordingState } from './recording-state.js';
 
 /**
  * Creates and returns UI for the voice recorder
  * @returns {Object} Object containing UI elements
  */
-export function createRecorderUI() {
+function createRecorderUI() {
   const element = document.createElement('div');
   element.style.cssText = `
     position: fixed;
@@ -54,3 +53,6 @@ export function createRecorderUI() {
     recordingIndicator: element.querySelector('.recording-indicator')
   };
 }
+
+// Make function globally available
+window.createRecorderUI = createRecorderUI;

@@ -8,12 +8,12 @@ function observeForNotebookUI() {
   console.log('Setting up mutation observer for NotebookLM UI');
   
   // Debug the initial DOM to understand structure
-  debugDOMStructure();
+  window.debugDOMStructure();
   
   const observer = new MutationObserver((mutations) => {
     // Periodically log structure to debug
     if (Math.random() < 0.05) {
-      debugDOMStructure();
+      window.debugDOMStructure();
     }
     
     // Look for the dialog that appears when adding text
@@ -60,13 +60,13 @@ function observeForNotebookUI() {
         
         // Add the speak button with a delay to ensure DOM is stable
         setTimeout(() => {
-          addSpeakButton(insertButton);
+          window.addSpeakButton(insertButton);
         }, 100);
       }
     }
     
     // Check for source material panel to add Voice button
-    identifyAndInjectVoiceButton();
+    window.identifyAndInjectVoiceButton();
   });
   
   observer.observe(document.body, {
@@ -77,7 +77,7 @@ function observeForNotebookUI() {
   });
   
   // Initial check for UI elements
-  setTimeout(identifyAndInjectVoiceButton, 2000);
+  setTimeout(window.identifyAndInjectVoiceButton, 2000);
 }
 
 /**
@@ -158,19 +158,19 @@ function identifyAndInjectVoiceButton() {
     
     if (panel && !panel.querySelector('.voice-to-text-button')) {
       console.log('Found source panel with Add source button, injecting voice button', panel);
-      injectVoiceButton(panel);
+      window.injectVoiceButton(panel);
     } else if (!document.querySelector('.voice-to-text-button')) {
       // If we can't find a proper panel, inject near the button
       console.log('Injecting voice button near Add source button');
       const container = document.createElement('div');
       container.style.marginTop = '8px';
       button.parentElement.insertBefore(container, button.nextSibling);
-      injectVoiceButton(container);
+      window.injectVoiceButton(container);
     }
   } else if (potentialPanels.length > 0 && !document.querySelector('.voice-to-text-button')) {
     // If we found panels but no Add source button
     console.log('Injecting voice button in first potential panel');
-    injectVoiceButton(potentialPanels[0]);
+    window.injectVoiceButton(potentialPanels[0]);
   }
 }
 

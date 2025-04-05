@@ -10,12 +10,12 @@ function addTextToNotebook(text) {
   console.log('Attempting to add text to notebook:', text.substring(0, 50) + '...');
   
   // Look for active dialog first (in case we're already in the add material dialog)
-  const activeDialog = findAddMaterialDialog();
+  const activeDialog = window.findAddMaterialDialog();
   if (activeDialog) {
     console.log('Found active dialog, trying to add text directly');
     
     // Find the input field
-    const inputField = findInputField(activeDialog);
+    const inputField = window.findInputField(activeDialog);
                       
     if (inputField) {
       console.log('Found input field in dialog, adding text');
@@ -32,7 +32,7 @@ function addTextToNotebook(text) {
       
       // Find submit button and click it
       setTimeout(() => {
-        const submitButton = findSubmitButton(activeDialog);
+        const submitButton = window.findSubmitButton(activeDialog);
                             
         if (submitButton) {
           console.log('Found submit button in dialog, clicking it');
@@ -49,7 +49,7 @@ function addTextToNotebook(text) {
   }
   
   // If no active dialog, look for the add source button
-  const addSourceButtons = findAddSourceButtons();
+  const addSourceButtons = window.findAddSourceButtons();
   
   if (addSourceButtons.length > 0) {
     console.log('Found Add source button, clicking it');
@@ -60,14 +60,14 @@ function addTextToNotebook(text) {
     // Wait for dialog to appear
     setTimeout(() => {
       // Find the input field
-      const dialog = findAddMaterialDialog();
+      const dialog = window.findAddMaterialDialog();
       if (!dialog) {
         console.log('Could not find dialog after clicking Add source button');
         alert('Could not find the dialog. Please add the text manually.');
         return;
       }
       
-      const inputField = findInputField(dialog);
+      const inputField = window.findInputField(dialog);
                         
       if (inputField) {
         console.log('Found input field, adding text');
@@ -84,7 +84,7 @@ function addTextToNotebook(text) {
         
         // Find submit button and click it
         setTimeout(() => {
-          const submitButton = findSubmitButton(dialog);
+          const submitButton = window.findSubmitButton(dialog);
                               
           if (submitButton) {
             console.log('Found submit button, clicking it');
