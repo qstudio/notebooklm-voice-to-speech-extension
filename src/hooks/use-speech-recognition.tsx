@@ -5,9 +5,10 @@ interface SpeechRecognitionHook {
   transcript: string;
   isListening: boolean;
   hasRecognitionSupport: boolean;
-  startListening: () => void;
+  startListening: (language?: string) => void;
   stopListening: () => void;
   resetTranscript: () => void;
+  error: string | null;
 }
 
 // Define the SpeechRecognition types
@@ -35,6 +36,7 @@ interface SpeechRecognitionAlternative {
 
 interface SpeechRecognitionError extends Event {
   error: string;
+  message?: string;
 }
 
 interface SpeechRecognitionClass {
@@ -47,6 +49,7 @@ interface SpeechRecognitionInstance extends EventTarget {
   lang: string;
   start(): void;
   stop(): void;
+  abort(): void;
   onresult: (event: SpeechRecognitionEvent) => void;
   onerror: (event: SpeechRecognitionError) => void;
   onend: () => void;
@@ -57,6 +60,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<SpeechRecognitionInstance | null>(null);
   const [hasRecognitionSupport, setHasRecognitionSupport] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if browser supports the Web Speech API
@@ -83,6 +87,36 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       
       recognitionInstance.onerror = (event: SpeechRecognitionError) => {
         console.error('Speech recognition error:', event.error);
+        let errorMessage = 'Unknown speech recognition error';
+        
+        switch(event.error) {
+          case 'no-speech':
+            errorMessage = 'No speech was detected. Please try again.';
+            break;
+          case 'aborted':
+            errorMessage = 'Speech recognition was aborted.';
+            break;
+          case 'audio-capture':
+            errorMessage = 'No microphone was found or microphone is not working.';
+            break;
+          case 'network':
+            errorMessage = 'Network error occurred. Please check your connection.';
+            break;
+          case 'not-allowed':
+            errorMessage = 'Microphone permission was denied. Please allow microphone access.';
+            break;
+          case 'service-not-allowed':
+            errorMessage = 'The speech recognition service is not allowed.';
+            break;
+          case 'bad-grammar':
+            errorMessage = 'There was an error with the speech grammar.';
+            break;
+          case 'language-not-supported':
+            errorMessage = 'The language is not supported.';
+            break;
+        }
+        
+        setError(errorMessage);
         setIsListening(false);
       };
       
@@ -94,13 +128,23 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     }
   }, []);
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback((language?: string) => {
     if (recognition && !isListening) {
       try {
+        // Reset any previous errors
+        setError(null);
+        
+        // Set language if provided
+        if (language) {
+          recognition.lang = language;
+        }
+        
         recognition.start();
         setIsListening(true);
       } catch (error) {
         console.error('Error starting speech recognition:', error);
+        setError('Failed to start speech recognition. Please try again.');
+        setIsListening(false);
       }
     }
   }, [recognition, isListening]);
@@ -122,7 +166,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     hasRecognitionSupport,
     startListening,
     stopListening,
-    resetTranscript
+    resetTranscript,
+    error
   };
 };
 

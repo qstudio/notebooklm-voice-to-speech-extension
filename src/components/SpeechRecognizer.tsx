@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Check, X, Clipboard, ClipboardCheck } from 'lucide-react';
+import { Mic, MicOff, Check, X, Clipboard, ClipboardCheck, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
@@ -8,9 +8,13 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface SpeechRecognizerProps {
   onTranscriptComplete: (transcript: string) => void;
+  language?: string;
 }
 
-const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onTranscriptComplete }) => {
+const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ 
+  onTranscriptComplete,
+  language = 'en-US'
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isCopied, setIsCopied] = useState(false);
@@ -22,7 +26,8 @@ const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onTranscriptComplet
     transcript: liveTranscript, 
     startListening, 
     stopListening, 
-    hasRecognitionSupport 
+    hasRecognitionSupport,
+    error
   } = useSpeechRecognition();
 
   useEffect(() => {
@@ -30,6 +35,16 @@ const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onTranscriptComplet
       setTranscript(liveTranscript);
     }
   }, [liveTranscript]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Speech Recognition Error",
+        description: error,
+        variant: "destructive"
+      });
+    }
+  }, [error, toast]);
 
   useEffect(() => {
     if (isExpanded && textareaRef.current) {
@@ -50,12 +65,12 @@ const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onTranscriptComplet
     if (!hasRecognitionSupport) {
       toast({
         title: "Speech Recognition Not Supported",
-        description: "Your browser doesn't support speech recognition.",
+        description: "Your browser doesn't support speech recognition. Try using Chrome.",
         variant: "destructive"
       });
       return;
     }
-    startListening();
+    startListening(language);
   };
 
   const handleStopRecording = () => {
@@ -177,7 +192,7 @@ const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onTranscriptComplet
         onClick={handleToggleExpand}
         className={cn(
           "rounded-full w-14 h-14 shadow-lg flex items-center justify-center",
-          isListening && "pulse-animation"
+          isListening && "animate-pulse bg-red-500 hover:bg-red-600"
         )}
         variant="default"
       >
