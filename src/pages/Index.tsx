@@ -45,7 +45,7 @@ const Index = () => {
   return <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <header className="max-w-4xl mx-auto mb-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-2 text-center">NotebookLM Voice to Text Chrome Extension</h1>
-        <p className="text-center text-muted-foreground">Add source material to Google notebooklm using voice dictation</p>
+        <p className="text-center text-muted-foreground">Add source material to Google NotebookLM using voice dictation</p>
       </header>
 
       <main className="max-w-4xl mx-auto space-y-8">
