@@ -20,13 +20,17 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Ensure we don't try to modify read-only files
+  // Build directly to public directory for Chrome extension
   build: {
-    outDir: 'dist',
+    outDir: 'public',
+    emptyOutDir: false, // Don't delete the existing icons and manifest
     rollupOptions: {
       output: {
         manualChunks: undefined,
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]'
       },
-    },
+    }
   }
 }));
