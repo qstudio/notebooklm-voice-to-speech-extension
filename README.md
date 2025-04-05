@@ -1,73 +1,45 @@
-# Welcome to your Lovable project
 
-## Project info
+# Voice to Text for Google NotebookLM
 
-**URL**: https://lovable.dev/projects/a6263e2c-62db-48f7-b602-62203bafae9b
+This Chrome extension allows you to add source material to Google NotebookLM using voice dictation.
 
-## How can I edit this code?
+## Setup Instructions
 
-There are several ways of editing your application.
+### Converting Icons
+Before loading the extension, you need to convert the base64 icon files to PNG:
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/a6263e2c-62db-48f7-b602-62203bafae9b) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Run the conversion script:
+```
+node scripts/convert-icons.js
 ```
 
-**Edit a file directly in GitHub**
+This will create the proper PNG files in the `public/icons` directory.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Loading the Extension in Chrome
 
-**Use GitHub Codespaces**
+1. Open Chrome and navigate to `chrome://extensions/`
+2. Enable "Developer mode" using the toggle in the top-right corner
+3. Click "Load unpacked"
+4. Select the `public` directory from this project
+5. The extension should now be loaded and available in your Chrome browser
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Features
 
-## What technologies are used for this project?
+- Speech-to-text conversion for adding source material to Google NotebookLM
+- Multiple language support for voice recognition
+- Customizable settings for automatic insertion and confirmation
 
-This project is built with:
+## Usage
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Navigate to Google NotebookLM
+2. Look for the "Speak" button when adding source material
+3. Click the button and start speaking
+4. Your dictation will be converted to text and added as source material
 
-## How can I deploy this project?
+## Settings
 
-Simply open [Lovable](https://lovable.dev/projects/a6263e2c-62db-48f7-b602-62203bafae9b) and click on Share -> Publish.
+You can configure the extension by clicking on its icon in the Chrome toolbar:
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- **Recognition Language**: Choose your preferred language for speech recognition
+- **Auto-insert after speaking**: Automatically insert text when you stop speaking
+- **Confirm before adding**: Ask for confirmation before automatically adding text
