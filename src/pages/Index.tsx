@@ -34,7 +34,7 @@ const Index = () => {
       </main>
       
       <footer className="mt-8 text-center text-xs text-muted-foreground">
-        <p>© 2025 Voice to Text for Google NotebookLM</p>
+        <p>Made by Alined</p>
       </footer>
     </div>
   );
