@@ -16,7 +16,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <header className="max-w-md mx-auto mb-6">
-        <h1 className="text-xl md:text-2xl font-bold mb-2 text-center">Voice Scribe for Google Notebook</h1>
+        <h1 className="text-xl md:text-2xl font-bold mb-2 text-center">Voice to Text for Google NotebookLM</h1>
         <p className="text-center text-muted-foreground text-sm">Add source material using voice dictation</p>
       </header>
 
@@ -34,7 +34,7 @@ const Index = () => {
       </main>
       
       <footer className="mt-8 text-center text-xs text-muted-foreground">
-        <p>© 2025 Voice Scribe for Google Notebook</p>
+        <p>© 2025 Voice to Text for Google NotebookLM</p>
       </footer>
     </div>
   );

@@ -1,7 +1,7 @@
 
 {
   "manifest_version": 3,
-  "name": "Voice Scribe for Google Notebook",
+  "name": "Voice to Text for Google NotebookLM",
   "version": "1.0.0",
   "description": "Add source material to Google notebook using voice dictation",
   "permissions": [
