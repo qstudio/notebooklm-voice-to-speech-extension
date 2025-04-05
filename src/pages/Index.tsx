@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import SpeechRecognizer from '@/components/SpeechRecognizer';
 import NotebookSimulator, { NotebookSimulatorRef } from '@/components/NotebookSimulator';
@@ -23,8 +22,8 @@ const Index = () => {
     }
     
     // If running in extension context, send to active tab
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-      chrome.runtime.sendMessage(
+    if (typeof window !== 'undefined' && 'chrome' in window && window.chrome.runtime) {
+      window.chrome.runtime.sendMessage(
         { action: "addSourceMaterial", text: transcript },
         (response) => {
           if (response && response.status === "error") {

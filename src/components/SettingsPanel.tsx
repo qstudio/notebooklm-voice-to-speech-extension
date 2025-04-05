@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,8 +38,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
 
   useEffect(() => {
     // Load settings from Chrome storage
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-      chrome.runtime.sendMessage(
+    if (typeof window !== 'undefined' && 'chrome' in window && window.chrome.runtime) {
+      window.chrome.runtime.sendMessage(
         { action: 'getSettings' },
         (response) => {
           if (response && response.status === 'success') {
@@ -60,8 +59,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
     setSettings(newSettings);
     
     // Save to Chrome storage if in extension context
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-      chrome.runtime.sendMessage(
+    if (typeof window !== 'undefined' && 'chrome' in window && window.chrome.runtime) {
+      window.chrome.runtime.sendMessage(
         { action: 'saveSettings', settings: newSettings },
         (response) => {
           if (response && response.status === 'saved') {
@@ -88,8 +87,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
     
     setSettings(defaultSettings);
     
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-      chrome.runtime.sendMessage(
+    if (typeof window !== 'undefined' && 'chrome' in window && window.chrome.runtime) {
+      window.chrome.runtime.sendMessage(
         { action: 'saveSettings', settings: defaultSettings },
         (response) => {
           if (response && response.status === 'saved') {
