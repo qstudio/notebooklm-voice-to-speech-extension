@@ -17,15 +17,13 @@
       message: 'Voice to Text initialized successfully!'
     }, '*');
     
-    // Import and initialize the DOM observer
-    import('./dom-observer.js')
-      .then(module => {
-        console.log('DOM Observer module loaded successfully');
-        module.observeForNotebookUI();
-      })
-      .catch(error => {
-        console.error('Error loading DOM Observer module:', error);
-      });
+    // Initialize the DOM observer directly instead of using dynamic import
+    if (typeof observeForNotebookUI === 'function') {
+      console.log('DOM Observer function found, initializing');
+      observeForNotebookUI();
+    } else {
+      console.error('DOM Observer function not found');
+    }
   }
   
   // Listen for messages from content script

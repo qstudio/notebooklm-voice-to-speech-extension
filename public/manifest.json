@@ -43,7 +43,18 @@
       "resources": [
         "icons/*", 
         "modules/*",
-        "modules/core.js"
+        "modules/core.js",
+        "modules/dom-observer.js",
+        "modules/dom-utils.js",
+        "modules/ui/*",
+        "modules/ui/buttons.js",
+        "modules/ui/recorder-dialog.js",
+        "modules/ui/recording-state.js",
+        "modules/ui/text-insertion.js",
+        "modules/voice/*",
+        "modules/voice/index.js",
+        "modules/voice/recognition-setup.js",
+        "modules/voice/ui-event-handlers.js"
       ],
       "matches": ["https://notebooklm.google.com/*"]
     }

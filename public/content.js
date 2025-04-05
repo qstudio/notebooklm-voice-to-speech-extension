@@ -75,11 +75,29 @@ window.addEventListener('message', function(event) {
   }
 });
 
-// Sequentially inject scripts
+// Sequentially inject scripts in the correct order
 async function injectAllScripts() {
   try {
-    // Inject the main module script first
+    // First inject utility modules
+    await injectScript('modules/dom-utils.js');
+    
+    // Then inject UI modules
+    await injectScript('modules/ui/recording-state.js');
+    await injectScript('modules/ui/buttons.js');
+    await injectScript('modules/ui/text-insertion.js');
+    await injectScript('modules/ui/recorder-dialog.js');
+    
+    // Then inject voice modules
+    await injectScript('modules/voice/recognition-setup.js');
+    await injectScript('modules/voice/ui-event-handlers.js');
+    await injectScript('modules/voice/index.js');
+    
+    // Then inject DOM observer
+    await injectScript('modules/dom-observer.js');
+    
+    // Finally inject the main module script
     await injectScript('modules/core.js');
+    
     console.log('All scripts injected successfully');
     
     // Initialize Voice to Text
@@ -89,7 +107,7 @@ async function injectAllScripts() {
         type: 'FROM_CONTENT_SCRIPT', 
         action: 'initialize' 
       }, '*');
-    }, 500);
+    }, 1000); // Increased timeout to ensure all scripts are fully loaded
   } catch (error) {
     console.error('Error injecting scripts:', error);
   }

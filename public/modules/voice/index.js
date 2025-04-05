@@ -1,15 +1,11 @@
 
 // Main voice recognition module for Google NotebookLM
-import { createRecorderUI } from '../ui/recorder-dialog.js';
-import { updateRecordingState } from '../ui/recording-state.js';
-import { createSpeechRecognition, setupRecognitionEvents } from './recognition-setup.js';
-import { setupUIEventHandlers } from './ui-event-handlers.js';
 
 /**
  * Starts the voice recognition process
  * @returns {void}
  */
-export function startVoiceRecognition() {
+function startVoiceRecognition() {
   console.log('Starting voice recognition');
   
   // Check if browser supports speech recognition
@@ -24,6 +20,27 @@ export function startVoiceRecognition() {
     console.log('Using speech recognition language:', settings.language);
     
     try {
+      // Check if all required functions are available
+      if (typeof createRecorderUI !== 'function') {
+        throw new Error('createRecorderUI function not available');
+      }
+      
+      if (typeof createSpeechRecognition !== 'function') {
+        throw new Error('createSpeechRecognition function not available');
+      }
+      
+      if (typeof setupRecognitionEvents !== 'function') {
+        throw new Error('setupRecognitionEvents function not available');
+      }
+      
+      if (typeof setupUIEventHandlers !== 'function') {
+        throw new Error('setupUIEventHandlers function not available');
+      }
+      
+      if (typeof updateRecordingState !== 'function') {
+        throw new Error('updateRecordingState function not available');
+      }
+      
       // Initialize speech recognition
       const recognition = createSpeechRecognition(settings.language);
       
@@ -42,7 +59,10 @@ export function startVoiceRecognition() {
       updateRecordingState(recorderUI, true);
     } catch (error) {
       console.error('Error initializing voice recognition:', error);
-      alert('Failed to start voice recognition. Please try again.');
+      alert('Failed to start voice recognition: ' + error.message);
     }
   });
 }
+
+// Make the function globally available
+window.startVoiceRecognition = startVoiceRecognition;

@@ -6,7 +6,7 @@
  * @param {Element} insertButton - The insert button
  * @returns {void}
  */
-export function addSpeakButton(insertButton) {
+function addSpeakButton(insertButton) {
   if (!insertButton || document.querySelector('.voice-to-text-speak-button')) {
     return;
   }
@@ -64,13 +64,14 @@ export function addSpeakButton(insertButton) {
     e.preventDefault();
     e.stopPropagation();
     console.log('Speak text button clicked');
-    // Import startVoiceRecognition dynamically to avoid circular dependencies
-    import('../voice/index.js').then(module => {
-      module.startVoiceRecognition();
-    }).catch(error => {
-      console.error('Error loading voice recognition module:', error);
+    
+    // Call startVoiceRecognition directly if available
+    if (typeof startVoiceRecognition === 'function') {
+      startVoiceRecognition();
+    } else {
+      console.error('Voice recognition function not available');
       alert('Could not start voice recognition. Please try again.');
-    });
+    }
   });
   
   // Insert after the insert button
@@ -95,7 +96,7 @@ export function addSpeakButton(insertButton) {
  * @param {Element} targetElement - The target element to inject the button into
  * @returns {void}
  */
-export function injectVoiceButton(targetElement) {
+function injectVoiceButton(targetElement) {
   // Don't add if already exists
   if (document.querySelector('.voice-to-text-button')) {
     return;
@@ -131,13 +132,14 @@ export function injectVoiceButton(targetElement) {
   // Add click event listener
   voiceButton.addEventListener('click', () => {
     console.log('Voice to Text button clicked');
-    // Import startVoiceRecognition dynamically to avoid circular dependencies
-    import('../voice/index.js').then(module => {
-      module.startVoiceRecognition();
-    }).catch(error => {
-      console.error('Error loading voice recognition module:', error);
+    
+    // Call startVoiceRecognition directly if available
+    if (typeof startVoiceRecognition === 'function') {
+      startVoiceRecognition();
+    } else {
+      console.error('Voice recognition function not available');
       alert('Could not start voice recognition. Please try again.');
-    });
+    }
   });
   
   // Add to page
@@ -157,3 +159,7 @@ export function injectVoiceButton(targetElement) {
     }
   }
 }
+
+// Make functions globally available
+window.addSpeakButton = addSpeakButton;
+window.injectVoiceButton = injectVoiceButton;

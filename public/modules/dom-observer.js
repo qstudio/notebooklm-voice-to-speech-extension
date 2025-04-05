@@ -1,12 +1,10 @@
 
 // DOM Observer functionality for Google NotebookLM
-import { logCurrentDOM, findAddMaterialDialog, findAddSourceButtons, findNotebookUI } from './dom-utils.js';
-import { addSpeakButton, injectVoiceButton } from './ui/buttons.js';
 
 /**
  * Watch for changes to detect notebook UI
  */
-export function observeForNotebookUI() {
+function observeForNotebookUI() {
   console.log('Setting up mutation observer for NotebookLM UI');
   
   // Debug DOM on initialization
@@ -23,20 +21,23 @@ export function observeForNotebookUI() {
     if (addMaterialDialog) {
       console.log('Found add material dialog:', addMaterialDialog);
       
-      // Use Angular-specific selectors for the labels
+      // Use Angular-specific selectors with better matching for the labels
       // Check for modifying "Paste text" label to "Text"
-      const pasteTextLabels = addMaterialDialog.querySelectorAll('span[_ngcontent-ng-c\\d+], label[_ngcontent-ng-c\\d+], div[_ngcontent-ng-c\\d+]');
+      const pasteTextLabels = Array.from(addMaterialDialog.querySelectorAll('span[_ngcontent-ng-c\\d+], label[_ngcontent-ng-c\\d+], div[_ngcontent-ng-c\\d+]'));
+      
+      // Log all labels for debugging
+      console.log('All dialog labels:', pasteTextLabels.map(el => el.textContent.trim()));
+      
       pasteTextLabels.forEach(label => {
-        // Log each label to debug
-        console.log('Checking label:', label.textContent);
-        
-        if (label.textContent === 'Paste text') {
+        // Exact match for "Paste text"
+        if (label.textContent.trim() === 'Paste text') {
           console.log('Found "Paste text" label, changing to "Text"');
           label.textContent = 'Text';
         }
-        if (label.textContent === 'Copied text') {
-          console.log('Found "Copied text" label, changing to "Text or Audio"');
-          label.textContent = 'Text or Audio';
+        // Exact match for "Copied text"
+        if (label.textContent.trim() === 'Copied text') {
+          console.log('Found "Copied text" label, changing to "Text or Speech"');
+          label.textContent = 'Text or Speech';
         }
       });
       
@@ -44,11 +45,11 @@ export function observeForNotebookUI() {
       if (!addMaterialDialog.querySelector('.voice-to-text-speak-button')) {
         // Try to find the Insert/Add button using Angular attributes
         const dialogButtons = Array.from(addMaterialDialog.querySelectorAll('button[_ngcontent-ng-c\\d+]'));
-        console.log('Found dialog buttons:', dialogButtons.map(b => b.textContent));
+        console.log('Found dialog buttons:', dialogButtons.map(b => b.textContent.trim()));
         
         const insertButton = dialogButtons.find(button => 
-          button.textContent.includes('Insert') || 
-          button.textContent.includes('Add')
+          button.textContent.trim().includes('Insert') || 
+          button.textContent.trim().includes('Add')
         );
         
         if (insertButton) {
@@ -59,8 +60,8 @@ export function observeForNotebookUI() {
           console.log('Could not find Insert/Add button with Angular attributes, trying alternative selectors');
           const fallbackButtons = Array.from(addMaterialDialog.querySelectorAll('button'));
           const fallbackInsertButton = fallbackButtons.find(button => 
-            button.textContent.includes('Insert') || 
-            button.textContent.includes('Add')
+            button.textContent.trim().includes('Insert') || 
+            button.textContent.trim().includes('Add')
           );
           
           if (fallbackInsertButton) {
@@ -94,3 +95,6 @@ export function observeForNotebookUI() {
     characterData: true
   });
 }
+
+// Make the function globally available
+window.observeForNotebookUI = observeForNotebookUI;
