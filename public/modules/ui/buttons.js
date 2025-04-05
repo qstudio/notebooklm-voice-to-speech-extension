@@ -63,34 +63,13 @@ function addSpeakButton(insertButton) {
     cursor: pointer;
   `;
   
-  // Create button content using DOM methods instead of innerHTML
-  const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  iconSvg.setAttribute("width", "16");
-  iconSvg.setAttribute("height", "16");
-  iconSvg.setAttribute("viewBox", "0 0 24 24");
-  iconSvg.setAttribute("fill", "none");
-  iconSvg.setAttribute("stroke", "currentColor");
-  iconSvg.setAttribute("stroke-width", "2");
-  iconSvg.style.marginRight = "8px";
-  
-  const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path1.setAttribute("d", "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z");
-  iconSvg.appendChild(path1);
-  
-  const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path2.setAttribute("d", "M19 10v2a7 7 0 0 1-14 0v-2");
-  iconSvg.appendChild(path2);
-  
-  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  line.setAttribute("x1", "12");
-  line.setAttribute("x2", "12");
-  line.setAttribute("y1", "19");
-  line.setAttribute("y2", "22");
-  iconSvg.appendChild(line);
-  
-  speakButton.appendChild(iconSvg);
+  // Create button content using DOM methods
+  const micIcon = window.createSvgElement("M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19L12 22");
+  micIcon.style.marginRight = "8px";
   
   const buttonText = document.createTextNode("Speak text");
+  
+  speakButton.appendChild(micIcon);
   speakButton.appendChild(buttonText);
   
   speakButton.addEventListener('click', (e) => {
@@ -166,45 +145,39 @@ function injectVoiceButton(targetElement) {
   const voiceButton = document.createElement('button');
   voiceButton.className = 'voice-to-text-button';
   voiceButton.setAttribute('type', 'button');
+  voiceButton.style.cssText = `
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background: #f1f3f4;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #202124;
+    font-family: 'Google Sans', Arial, sans-serif;
+  `;
   
-  // Create button content using DOM methods instead of innerHTML
+  // Create button content using DOM methods
   const buttonSpan = document.createElement('span');
   buttonSpan.style.display = 'flex';
   buttonSpan.style.alignItems = 'center';
   buttonSpan.style.padding = '8px 12px';
-  buttonSpan.style.borderRadius = '4px';
-  buttonSpan.style.background = '#f1f3f4';
-  buttonSpan.style.margin = '8px';
   
-  const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  iconSvg.setAttribute("width", "16");
-  iconSvg.setAttribute("height", "16");
-  iconSvg.setAttribute("viewBox", "0 0 24 24");
-  iconSvg.setAttribute("fill", "none");
-  iconSvg.setAttribute("stroke", "currentColor");
-  iconSvg.setAttribute("stroke-width", "2");
-  iconSvg.style.marginRight = "8px";
+  // Create mic icon
+  const micIcon = window.createSvgElement("M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19L12 22");
+  micIcon.style.marginRight = "8px";
   
-  const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path1.setAttribute("d", "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z");
-  iconSvg.appendChild(path1);
-  
-  const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path2.setAttribute("d", "M19 10v2a7 7 0 0 1-14 0v-2");
-  iconSvg.appendChild(path2);
-  
-  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  line.setAttribute("x1", "12");
-  line.setAttribute("x2", "12");
-  line.setAttribute("y1", "19");
-  line.setAttribute("y2", "22");
-  iconSvg.appendChild(line);
-  
-  buttonSpan.appendChild(iconSvg);
-  
+  // Add text
   const buttonText = document.createTextNode("Voice to Text");
+  
+  // Add icon and text to span
+  buttonSpan.appendChild(micIcon);
   buttonSpan.appendChild(buttonText);
   
+  // Add span to button
   voiceButton.appendChild(buttonSpan);
   
   // Add click event listener
@@ -252,4 +225,3 @@ function injectVoiceButton(targetElement) {
 // Make functions globally available
 window.addSpeakButton = addSpeakButton;
 window.injectVoiceButton = injectVoiceButton;
-

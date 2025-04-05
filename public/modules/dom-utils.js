@@ -3,7 +3,7 @@
 
 /**
  * Creates an SVG element with all its child elements
- * @param {string} svgPath - The SVG path data
+ * @param {string} svgPath - The SVG path data (can include multiple paths separated by spaces)
  * @param {number} width - SVG width
  * @param {number} height - SVG height 
  * @returns {SVGElement} The created SVG element
@@ -17,10 +17,15 @@ function createSvgElement(svgPath, width = 16, height = 16) {
   svg.setAttribute("stroke", "currentColor");
   svg.setAttribute("stroke-width", "2");
   
-  // Create path element
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", svgPath);
-  svg.appendChild(path);
+  // Handle multiple path strings (separated by spaces)
+  const pathParts = svgPath.split('M').filter(Boolean);
+  
+  pathParts.forEach(pathPart => {
+    // Create path element
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", 'M' + pathPart.trim());
+    svg.appendChild(path);
+  });
   
   return svg;
 }
@@ -32,7 +37,7 @@ function createSvgElement(svgPath, width = 16, height = 16) {
 function findAddSourceButtons() {
   return Array.from(document.querySelectorAll('button')).filter(button => {
     const text = button.textContent.trim().toLowerCase();
-    return text.includes('add source') || text.includes('add material');
+    return text.includes('add source') || text.includes('add material') || text === 'add';
   });
 }
 

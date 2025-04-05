@@ -118,4 +118,3 @@ function createRecorderUI() {
 
 // Make function globally available
 window.createRecorderUI = createRecorderUI;
-

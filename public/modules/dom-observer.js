@@ -21,26 +21,51 @@ function observeForNotebookUI() {
     if (addMaterialDialog) {
       console.log('Found add material dialog:', addMaterialDialog);
       
-      // Try to find textareas, inputs or editable content elements in the dialog
-      const textInputs = addMaterialDialog.querySelectorAll('textarea, input[type="text"], [contenteditable="true"]');
-      console.log('Dialog text inputs:', textInputs.length, textInputs);
-      
-      // Find all the labels and headings within the dialog
-      const labels = Array.from(addMaterialDialog.querySelectorAll('label, h1, h2, h3, h4, h5, h6, div > span'));
-      console.log('Dialog labels:', labels.map(label => ({
-        text: label.textContent.trim(),
-        nodeName: label.nodeName,
-        classes: label.className
-      })));
-      
-      // Try to modify labels with exact text content match
-      labels.forEach(label => {
-        const text = label.textContent.trim();
-        if (text === 'Paste text' || text === 'Copied text') {
-          console.log(`Found "${text}" label, changing to "Text or Speech"`, label);
-          label.textContent = 'Text or Speech';
-        }
+      // Look for the "Add source", "Add sources" or "Paste copied text" header to identify dialog type
+      const dialogHeaders = Array.from(addMaterialDialog.querySelectorAll('h1, h2, h3, h4, h5, h6, div'));
+      const textDialogHeaders = dialogHeaders.filter(header => {
+        const headerText = header.textContent.trim().toLowerCase();
+        return headerText.includes('paste copied text') || 
+               headerText.includes('paste text') || 
+               headerText.includes('copied text');
       });
+      
+      if (textDialogHeaders.length > 0) {
+        console.log('Found paste text dialog header:', textDialogHeaders[0].textContent);
+        
+        // Try to modify labels with exact text content match
+        textDialogHeaders.forEach(label => {
+          const text = label.textContent.trim();
+          if (text === 'Paste text' || text === 'Copied text' || text === 'Paste copied text') {
+            console.log(`Found "${text}" label, changing to "Text or Speech"`, label);
+            
+            // First try to modify just the text node
+            const childNodes = Array.from(label.childNodes);
+            childNodes.forEach(node => {
+              if (node.nodeType === Node.TEXT_NODE) {
+                if (node.textContent.trim() === text) {
+                  node.textContent = "Text or Speech";
+                }
+              }
+            });
+            
+            // If that fails, try the safer way (this method preserves child elements)
+            if (label.textContent.trim() !== "Text or Speech") {
+              // Clone children before changing
+              const fragmentClone = document.createDocumentFragment();
+              Array.from(label.childNodes).forEach(child => {
+                if (child.nodeType !== Node.TEXT_NODE) {
+                  fragmentClone.appendChild(child.cloneNode(true));
+                }
+              });
+              
+              // Clear and reset with new text
+              label.textContent = "Text or Speech";
+              label.appendChild(fragmentClone);
+            }
+          }
+        });
+      }
       
       // Find all buttons in the dialog
       const dialogButtons = Array.from(addMaterialDialog.querySelectorAll('button'));
@@ -65,7 +90,7 @@ function observeForNotebookUI() {
       }
     }
     
-    // Check for source material panel to add Voice button
+    // Enhance button targeting for the main source panel
     window.identifyAndInjectVoiceButton();
   });
   
@@ -113,11 +138,13 @@ function debugDOMStructure() {
     }
   });
   
-  // Look specifically for source material sections
-  const sourceMaterialSections = Array.from(document.querySelectorAll(
-    '[aria-label="Source Materials"], [data-testid="source-material-list"], [role="complementary"]'
-  ));
-  console.log(`Found ${sourceMaterialSections.length} potential source material sections`);
+  // Look specifically for "Add source" button which is our primary injection target
+  const addSourceButtons = Array.from(document.querySelectorAll('button')).filter(button => {
+    const text = button.textContent.trim().toLowerCase();
+    return text.includes('add source') || text.includes('add sources') || text === 'add';
+  });
+  console.log(`Found ${addSourceButtons.length} "Add source" buttons:`, 
+    addSourceButtons.map(btn => btn.textContent.trim()));
   
   // Find dialogs
   const dialogs = Array.from(document.querySelectorAll('[role="dialog"]'));
@@ -130,47 +157,100 @@ function debugDOMStructure() {
  * Identify notebook UI and inject voice button
  */
 function identifyAndInjectVoiceButton() {
-  // Try multiple strategies to find the source material panel
-  const potentialPanels = [
-    ...document.querySelectorAll('[aria-label="Source Materials"]'),
-    ...document.querySelectorAll('[data-testid="source-material-list"]'),
-    ...document.querySelectorAll('[role="complementary"]'),
-    ...document.querySelectorAll('aside'),
-    ...document.querySelectorAll('.source-material-panel, .sidebar, .side-panel')
-  ];
-  
-  console.log(`Found ${potentialPanels.length} potential source material panels`);
-  
-  // Find all "Add source" buttons throughout the page
+  // First, find the "Add source" button from the screenshots
   const addSourceButtons = Array.from(document.querySelectorAll('button')).filter(button => {
     const text = button.textContent.trim().toLowerCase();
-    return text.includes('add source') || text.includes('add material');
+    return text.includes('add source') || text === 'add';
   });
   
-  console.log(`Found ${addSourceButtons.length} "Add source" buttons`);
+  // Look for button containing an SVG icon and text "Add source"
+  const mainAddSourceButton = addSourceButtons.find(button => {
+    return button.querySelector('svg') && 
+           button.textContent.trim().includes('Add source');
+  });
   
-  if (addSourceButtons.length > 0) {
-    // Find the closest parent that might be the source panel
-    const button = addSourceButtons[0];
-    let panel = button.closest('[role="complementary"]') || 
-                button.closest('aside') ||
-                button.parentElement;
+  if (mainAddSourceButton) {
+    console.log('Found main Add source button:', mainAddSourceButton);
     
-    if (panel && !panel.querySelector('.voice-to-text-button')) {
-      console.log('Found source panel with Add source button, injecting voice button', panel);
-      window.injectVoiceButton(panel);
-    } else if (!document.querySelector('.voice-to-text-button')) {
-      // If we can't find a proper panel, inject near the button
-      console.log('Injecting voice button near Add source button');
-      const container = document.createElement('div');
-      container.style.marginTop = '8px';
-      button.parentElement.insertBefore(container, button.nextSibling);
-      window.injectVoiceButton(container);
+    // Check if Voice to Text button already exists
+    if (!document.querySelector('.voice-to-text-button')) {
+      // Create a voice button in the same container
+      const container = mainAddSourceButton.closest('div, section, aside');
+      
+      if (container) {
+        console.log('Found container for Add source button, injecting voice button here', container);
+        
+        // Create button based on the screenshot
+        const voiceButton = document.createElement('button');
+        voiceButton.className = 'voice-to-text-button';
+        voiceButton.setAttribute('type', 'button');
+        voiceButton.style.cssText = `
+          width: 100%;
+          padding: 10px;
+          margin-top: 10px;
+          border-radius: 8px;
+          background: #f1f3f4;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #202124;
+          font-family: 'Google Sans', Arial, sans-serif;
+        `;
+        
+        // Use DOM methods to build the button content
+        const buttonText = document.createTextNode("Voice to Text");
+        
+        // Create mic icon
+        const micIcon = window.createSvgElement("M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19L12 22");
+        micIcon.style.marginRight = "8px";
+        
+        voiceButton.appendChild(micIcon);
+        voiceButton.appendChild(buttonText);
+        
+        // Add click handler
+        voiceButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Voice to Text button clicked');
+          
+          if (typeof window.startVoiceRecognition === 'function') {
+            window.startVoiceRecognition();
+          } else {
+            console.error('Voice recognition function not available');
+            alert('Could not start voice recognition. Please try again.');
+          }
+        });
+        
+        // Insert after the Add source button
+        container.insertBefore(voiceButton, mainAddSourceButton.nextSibling);
+        console.log('Voice button injected successfully');
+      } else {
+        console.error('Could not find container for Add source button');
+      }
+    } else {
+      console.log('Voice button already exists, not adding again');
     }
-  } else if (potentialPanels.length > 0 && !document.querySelector('.voice-to-text-button')) {
-    // If we found panels but no Add source button
-    console.log('Injecting voice button in first potential panel');
-    window.injectVoiceButton(potentialPanels[0]);
+  } else {
+    console.log('Could not find main Add source button');
+    
+    // Try alternative method - find the sources section
+    const sourcesTitles = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6, div')).filter(
+      el => el.textContent.trim() === 'Sources'
+    );
+    
+    if (sourcesTitles.length > 0) {
+      console.log('Found Sources title:', sourcesTitles[0]);
+      
+      // Navigate up to find the parent container
+      const sourcesSection = sourcesTitles[0].closest('div, section, aside');
+      
+      if (sourcesSection && !document.querySelector('.voice-to-text-button')) {
+        console.log('Found Sources section, injecting voice button here', sourcesSection);
+        window.injectVoiceButton(sourcesSection);
+      }
+    }
   }
 }
 
