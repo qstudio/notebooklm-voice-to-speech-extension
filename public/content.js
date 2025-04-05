@@ -15,47 +15,56 @@ function initializeVoiceToText() {
 function observeForNotebookUI() {
   console.log('Setting up mutation observer for NotebookLM UI');
   
+  // Debug DOM on initialization
+  logCurrentDOM();
+  
   const observer = new MutationObserver((mutations) => {
-    // Debug current DOM structure periodically
-    if (Math.random() < 0.05) { // Only log occasionally to avoid flooding
-      console.log('Current DOM structure:', document.body.innerHTML.substring(0, 200) + '...');
-      console.log('Looking for NotebookLM UI elements...');
+    // Debug current DOM structure occasionally
+    if (Math.random() < 0.05) {
+      logCurrentDOM();
     }
     
-    // Check for the Add Source button or panel
+    // Look for the dialog that appears when adding text
+    const addMaterialDialog = document.querySelector('div[role="dialog"]');
+    if (addMaterialDialog) {
+      console.log('Found add material dialog:', addMaterialDialog);
+      
+      // Check for modifying "Paste text" label to "Text"
+      const pasteTextLabels = addMaterialDialog.querySelectorAll('span, label, div');
+      pasteTextLabels.forEach(label => {
+        if (label.textContent === 'Paste text') {
+          console.log('Found "Paste text" label, changing to "Text"');
+          label.textContent = 'Text';
+        }
+        if (label.textContent === 'Copied text') {
+          console.log('Found "Copied text" label, changing to "Text or Audio"');
+          label.textContent = 'Text or Audio';
+        }
+      });
+      
+      // Look for insert button to add "Speak text" button
+      const dialogButtons = Array.from(addMaterialDialog.querySelectorAll('button'));
+      const insertButton = dialogButtons.find(button => 
+        button.textContent.includes('Insert') || 
+        button.textContent.includes('Add')
+      );
+      
+      if (insertButton && !addMaterialDialog.querySelector('.voice-to-text-speak-button')) {
+        console.log('Found Insert/Add button in dialog, adding Speak text button', insertButton);
+        addSpeakButton(insertButton);
+      }
+    }
+    
+    // Check for "Add source" button in the main UI
     const addSourceButtons = Array.from(document.querySelectorAll('button')).filter(button => {
-      return button.textContent.includes('Add source') || 
-             button.textContent.includes('New source') ||
-             button.textContent.includes('Add material');
+      const buttonText = button.textContent.toLowerCase();
+      return buttonText.includes('add source') || 
+             buttonText.includes('new source') ||
+             buttonText.includes('add material');
     });
     
-    // Check for modifying "Paste text" label to "Text"
-    const pasteTextLabels = document.querySelectorAll('span');
-    pasteTextLabels.forEach(label => {
-      if (label.textContent === 'Paste text') {
-        console.log('Found "Paste text" label, changing to "Text"');
-        label.textContent = 'Text';
-      }
-    });
-    
-    // Check for modifying "Copied text" label to "Text or Audio"
-    const copiedTextLabels = document.querySelectorAll('span');
-    copiedTextLabels.forEach(label => {
-      if (label.textContent === 'Copied text') {
-        console.log('Found "Copied text" label, changing to "Text or Audio"');
-        label.textContent = 'Text or Audio';
-      }
-    });
-    
-    // Check for insert button to add "Speak text" button
-    const insertButtons = Array.from(document.querySelectorAll('button')).filter(button => {
-      return button.textContent.includes('Insert');
-    });
-    
-    if (insertButtons.length > 0 && !document.querySelector('.voice-to-text-speak-button')) {
-      console.log('Found Insert button, adding Speak text button');
-      const insertButton = insertButtons[0];
-      addSpeakButton(insertButton);
+    if (addSourceButtons.length > 0) {
+      console.log('Found Add source buttons:', addSourceButtons);
     }
     
     // Add voice button to source material panel if it exists
@@ -64,7 +73,7 @@ function observeForNotebookUI() {
                        document.querySelector('[role="complementary"]');
     
     if (notebookUI && !document.querySelector('.voice-to-text-button')) {
-      console.log('Found NotebookLM UI, injecting voice button');
+      console.log('Found NotebookLM UI, injecting voice button', notebookUI);
       injectVoiceButton(notebookUI);
     }
   });
@@ -75,6 +84,28 @@ function observeForNotebookUI() {
     attributes: true,
     characterData: true
   });
+}
+
+// Log current DOM for debugging
+function logCurrentDOM() {
+  console.log('Current DOM structure:');
+  
+  // Log all buttons
+  const allButtons = document.querySelectorAll('button');
+  console.log(`Found ${allButtons.length} buttons on the page:`);
+  allButtons.forEach(button => {
+    if (button.textContent.trim()) {
+      console.log(`- Button text: "${button.textContent.trim()}"`);
+    }
+  });
+  
+  // Log dialogs
+  const dialogs = document.querySelectorAll('[role="dialog"]');
+  console.log(`Found ${dialogs.length} dialogs on the page`);
+  
+  // Log potential source material panels
+  const panels = document.querySelectorAll('[role="complementary"]');
+  console.log(`Found ${panels.length} complementary panels on the page`);
 }
 
 // Add a "Speak text" button next to the Insert button
@@ -89,8 +120,11 @@ function addSpeakButton(insertButton) {
     return;
   }
   
+  console.log('Adding Speak text button next to:', insertButton);
+  
   const speakButton = document.createElement('button');
   speakButton.className = 'voice-to-text-speak-button';
+  speakButton.setAttribute('aria-label', 'Speak text');
   speakButton.style.cssText = `
     display: inline-flex;
     align-items: center;
@@ -117,6 +151,7 @@ function addSpeakButton(insertButton) {
   speakButton.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('Speak text button clicked');
     startVoiceRecognition();
   });
   
@@ -143,6 +178,7 @@ function injectVoiceButton(targetElement) {
   
   // Add click event listener
   voiceButton.addEventListener('click', () => {
+    console.log('Voice to Text button clicked');
     startVoiceRecognition();
   });
   
@@ -278,11 +314,55 @@ function createRecorderUI() {
 function addTextToNotebook(text) {
   console.log('Attempting to add text to notebook:', text.substring(0, 50) + '...');
   
-  // Look for the add source button
+  // Look for active dialog first (in case we're already in the add material dialog)
+  const activeDialog = document.querySelector('div[role="dialog"]');
+  if (activeDialog) {
+    console.log('Found active dialog, trying to add text directly');
+    
+    // Find the input field
+    const inputField = activeDialog.querySelector('textarea') || 
+                      activeDialog.querySelector('[contenteditable="true"]');
+                      
+    if (inputField) {
+      console.log('Found input field in dialog, adding text');
+      
+      // Set the text
+      if (inputField.tagName === 'TEXTAREA' || inputField.tagName === 'INPUT') {
+        inputField.value = text;
+        inputField.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        // Handle contenteditable
+        inputField.innerHTML = text;
+        inputField.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      
+      // Find submit button and click it
+      setTimeout(() => {
+        const submitButton = activeDialog.querySelector('button[type="submit"]') ||
+                            Array.from(activeDialog.querySelectorAll('button')).find(btn => 
+                              btn.textContent.includes('Add') || btn.textContent.includes('Insert')
+                            );
+                            
+        if (submitButton) {
+          console.log('Found submit button in dialog, clicking it');
+          submitButton.click();
+          alert('Text added successfully!');
+        } else {
+          console.log('Could not find submit button in dialog');
+          alert('Could not find the submit button. Please add the text manually.');
+        }
+      }, 500);
+      
+      return;
+    }
+  }
+  
+  // If no active dialog, look for the add source button
   const addSourceButtons = Array.from(document.querySelectorAll('button')).filter(button => {
-    return button.textContent.includes('Add source') || 
-           button.textContent.includes('New source') ||
-           button.textContent.includes('Add material');
+    const buttonText = button.textContent.toLowerCase();
+    return buttonText.includes('add source') || 
+           buttonText.includes('new source') ||
+           buttonText.includes('add material');
   });
   
   if (addSourceButtons.length > 0) {
@@ -294,9 +374,16 @@ function addTextToNotebook(text) {
     // Wait for dialog to appear
     setTimeout(() => {
       // Find the input field
-      const inputField = document.querySelector('div[role="dialog"] textarea') || 
-                         document.querySelector('div[role="dialog"] [contenteditable="true"]');
-                         
+      const dialog = document.querySelector('div[role="dialog"]');
+      if (!dialog) {
+        console.log('Could not find dialog after clicking Add source button');
+        alert('Could not find the dialog. Please add the text manually.');
+        return;
+      }
+      
+      const inputField = dialog.querySelector('textarea') || 
+                        dialog.querySelector('[contenteditable="true"]');
+                        
       if (inputField) {
         console.log('Found input field, adding text');
         
@@ -312,8 +399,8 @@ function addTextToNotebook(text) {
         
         // Find submit button and click it
         setTimeout(() => {
-          const submitButton = document.querySelector('div[role="dialog"] button[type="submit"]') ||
-                              Array.from(document.querySelectorAll('div[role="dialog"] button')).find(btn => 
+          const submitButton = dialog.querySelector('button[type="submit"]') ||
+                              Array.from(dialog.querySelectorAll('button')).find(btn => 
                                 btn.textContent.includes('Add') || btn.textContent.includes('Insert')
                               );
                               
@@ -330,7 +417,7 @@ function addTextToNotebook(text) {
         console.log('Could not find input field');
         alert('Could not find the input field. Please add the text manually.');
       }
-    }, 500);
+    }, 1000);
   } else {
     console.log('Could not find Add Source button');
     alert('Could not find the Add Source button. The UI may have changed.');
@@ -357,11 +444,13 @@ style.textContent = `
 document.head.appendChild(style);
 
 // Start the extension
+console.log('Starting Voice to Text for Google NotebookLM extension');
 initializeVoiceToText();
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "checkContentScript") {
+    console.log('Received checkContentScript message, responding with active status');
     sendResponse({ status: "active" });
   }
   return true;
