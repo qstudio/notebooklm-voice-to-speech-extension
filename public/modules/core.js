@@ -1,12 +1,15 @@
 
 // Core functionality for Voice to Text for Google NotebookLM
 import { logCurrentDOM, findAddMaterialDialog, findNotebookUI, findAddSourceButtons } from './dom-utils.js';
-import { injectVoiceButton, addSpeakButton } from './ui.js';
+import { addSpeakButton, injectVoiceButton } from './ui.js';
+
+// Create a global namespace for our extension
+window.VoiceToTextNLM = window.VoiceToTextNLM || {};
 
 /**
  * Main initialization function
  */
-export function initializeVoiceToText() {
+function initializeVoiceToText() {
   console.log('Initializing Voice to Text for Google NotebookLM');
   
   // Look for notebook UI elements and inject our voice button
@@ -16,7 +19,7 @@ export function initializeVoiceToText() {
 /**
  * Watch for changes to detect notebook UI
  */
-export function observeForNotebookUI() {
+function observeForNotebookUI() {
   console.log('Setting up mutation observer for NotebookLM UI');
   
   // Debug DOM on initialization
@@ -83,3 +86,8 @@ export function observeForNotebookUI() {
   });
 }
 
+// Export functions to the global namespace
+window.VoiceToTextNLM.initialize = initializeVoiceToText;
+
+// Also export for ES modules
+export { initializeVoiceToText };

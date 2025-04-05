@@ -1,6 +1,5 @@
 
 // Voice to Text for Google NotebookLM - Content Script
-import { initializeVoiceToText } from './modules/core.js';
 
 console.log('Voice to Text for Google NotebookLM content script loaded');
 
@@ -23,9 +22,26 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Start the extension
-console.log('Starting Voice to Text for Google NotebookLM extension');
-initializeVoiceToText();
+// We'll use a script injection approach instead of ES6 imports
+function injectScript(file) {
+  const script = document.createElement('script');
+  script.setAttribute('type', 'text/javascript');
+  script.setAttribute('src', chrome.runtime.getURL(file));
+  document.body.appendChild(script);
+  return script;
+}
+
+// Inject our main module script
+const mainScript = injectScript('modules/core.js');
+mainScript.onload = function() {
+  // Initialize via window function that our modules will expose
+  console.log('Starting Voice to Text for Google NotebookLM extension');
+  if (window.VoiceToTextNLM && window.VoiceToTextNLM.initialize) {
+    window.VoiceToTextNLM.initialize();
+  } else {
+    console.error('Voice to Text initialization function not found');
+  }
+};
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

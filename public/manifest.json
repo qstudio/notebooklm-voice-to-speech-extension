@@ -30,8 +30,7 @@
     {
       "matches": ["https://notebooklm.google.com/*"],
       "js": ["content.js"],
-      "css": ["content.css"],
-      "type": "module"
+      "css": ["content.css"]
     }
   ],
   "background": {
@@ -40,7 +39,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["icons/*", "modules/*"],
+      "resources": ["icons/*", "modules/*", "modules/ui/*", "modules/voice/*"],
       "matches": ["https://notebooklm.google.com/*"]
     }
   ],
