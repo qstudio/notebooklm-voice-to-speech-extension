@@ -171,10 +171,4 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
   };
 };
 
-// Add type definitions for the Web Speech API
-declare global {
-  interface Window {
-    SpeechRecognition?: SpeechRecognitionClass;
-    webkitSpeechRecognition?: SpeechRecognitionClass;
-  }
-}
+// Remove the conflicting global declarations since they're already defined in chrome.d.ts
