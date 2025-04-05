@@ -10,7 +10,7 @@ Before loading the extension, you need to convert the base64 icon files to PNG:
 
 1. Run the conversion script:
 ```
-node scripts/convert-icons.js
+node scripts/convert-icons.cjs
 ```
 
 This will create the proper PNG files in the `public/icons` directory.
