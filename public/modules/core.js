@@ -4,18 +4,6 @@
 (function() {
   console.log('Core.js script loaded and executing');
   
-  // Import all necessary functionality from modular files
-  import('./dom-observer.js')
-    .then(module => {
-      window.VoiceToTextNLM = {
-        observeForNotebookUI: module.observeForNotebookUI
-      };
-      console.log('DOM Observer module loaded successfully');
-    })
-    .catch(error => {
-      console.error('Error loading DOM Observer module:', error);
-    });
-  
   /**
    * Main initialization function
    */
@@ -29,22 +17,15 @@
       message: 'Voice to Text initialized successfully!'
     }, '*');
     
-    // Use the imported function if available
-    if (window.VoiceToTextNLM && window.VoiceToTextNLM.observeForNotebookUI) {
-      window.VoiceToTextNLM.observeForNotebookUI();
-    } else {
-      console.error('Voice to Text initialization function not found!');
-      
-      // Try to import the module again as a fallback
-      import('./dom-observer.js')
-        .then(module => {
-          console.log('DOM Observer module loaded as fallback');
-          module.observeForNotebookUI();
-        })
-        .catch(error => {
-          console.error('Failed to load DOM Observer module as fallback:', error);
-        });
-    }
+    // Import and initialize the DOM observer
+    import('./dom-observer.js')
+      .then(module => {
+        console.log('DOM Observer module loaded successfully');
+        module.observeForNotebookUI();
+      })
+      .catch(error => {
+        console.error('Error loading DOM Observer module:', error);
+      });
   }
   
   // Listen for messages from content script

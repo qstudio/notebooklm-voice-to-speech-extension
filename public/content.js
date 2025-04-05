@@ -19,23 +19,45 @@ style.textContent = `
   .record-button.recording {
     background: #ea4335 !important;
   }
+  
+  .recording-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-color: #ea4335;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
 `;
 document.head.appendChild(style);
 
-// We'll use a more reliable script injection approach
+// Inject script with better error handling
 function injectScript(file) {
-  console.log('Injecting script:', file);
-  const script = document.createElement('script');
-  script.setAttribute('type', 'text/javascript');
-  script.setAttribute('src', chrome.runtime.getURL(file));
-  script.onload = function() {
-    console.log(`Script ${file} loaded successfully`);
-  };
-  script.onerror = function(error) {
-    console.error(`Error loading script ${file}:`, error);
-  };
-  document.documentElement.appendChild(script);
-  return script;
+  return new Promise((resolve, reject) => {
+    console.log('Injecting script:', file);
+    const script = document.createElement('script');
+    script.setAttribute('type', 'text/javascript');
+    script.setAttribute('src', chrome.runtime.getURL(file));
+    
+    script.onload = function() {
+      console.log(`Script ${file} loaded successfully`);
+      resolve(file);
+    };
+    
+    script.onerror = function(error) {
+      console.error(`Error loading script ${file}:`, error);
+      reject(error);
+    };
+    
+    document.documentElement.appendChild(script);
+  });
 }
 
 // Create a communication bridge between content script and injected script
@@ -53,17 +75,28 @@ window.addEventListener('message', function(event) {
   }
 });
 
-// Inject the main module script first
-injectScript('modules/core.js');
+// Sequentially inject scripts
+async function injectAllScripts() {
+  try {
+    // Inject the main module script first
+    await injectScript('modules/core.js');
+    console.log('All scripts injected successfully');
+    
+    // Initialize Voice to Text
+    setTimeout(() => {
+      console.log('Initializing Voice to Text...');
+      window.postMessage({ 
+        type: 'FROM_CONTENT_SCRIPT', 
+        action: 'initialize' 
+      }, '*');
+    }, 500);
+  } catch (error) {
+    console.error('Error injecting scripts:', error);
+  }
+}
 
-// Send a message to the page after script injection to initialize
-setTimeout(() => {
-  console.log('Attempting to initialize Voice to Text...');
-  window.postMessage({ 
-    type: 'FROM_CONTENT_SCRIPT', 
-    action: 'initialize' 
-  }, '*');
-}, 1000);
+// Start injecting scripts
+injectAllScripts();
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
