@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,11 @@ interface SourceMaterial {
   timestamp: Date;
 }
 
-const NotebookSimulator: React.FC = () => {
+export interface NotebookSimulatorRef {
+  addSourceMaterial: (text: string) => void;
+}
+
+const NotebookSimulator = forwardRef<NotebookSimulatorRef, {}>((props, ref) => {
   const [sourceMaterials, setSourceMaterials] = useState<SourceMaterial[]>([]);
   const [activeTab, setActiveTab] = useState('notebook');
 
@@ -24,6 +28,11 @@ const NotebookSimulator: React.FC = () => {
     setSourceMaterials([...sourceMaterials, newMaterial]);
     setActiveTab('sources');
   };
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    addSourceMaterial
+  }));
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-md">
@@ -109,6 +118,8 @@ const NotebookSimulator: React.FC = () => {
       </CardFooter>
     </Card>
   );
-};
+});
+
+NotebookSimulator.displayName = 'NotebookSimulator';
 
 export default NotebookSimulator;

@@ -1,20 +1,20 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import SpeechRecognizer from '@/components/SpeechRecognizer';
-import NotebookSimulator from '@/components/NotebookSimulator';
+import NotebookSimulator, { NotebookSimulatorRef } from '@/components/NotebookSimulator';
 import ExtensionInfo from '@/components/ExtensionInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
   const [sourceMaterials, setSourceMaterials] = useState<string[]>([]);
-  const notebookSimulatorRef = React.useRef<any>(null);
+  const notebookSimulatorRef = useRef<NotebookSimulatorRef>(null);
 
   const handleTranscriptComplete = (transcript: string) => {
     setSourceMaterials([...sourceMaterials, transcript]);
     
     // In a real Chrome extension, we would inject the transcript into Google's notebook LM
     // Here we're just simulating that behavior
-    if (notebookSimulatorRef.current && notebookSimulatorRef.current.addSourceMaterial) {
+    if (notebookSimulatorRef.current) {
       notebookSimulatorRef.current.addSourceMaterial(transcript);
     }
   };

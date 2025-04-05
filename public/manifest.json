@@ -4,8 +4,15 @@
   "name": "Voice Scribe for Google Notebook",
   "version": "1.0.0",
   "description": "Add source material to Google notebook using voice dictation",
-  "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["https://notebook.google.com/*"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://notebook.google.com/*"
+  ],
   "action": {
     "default_popup": "index.html",
     "default_icon": {
@@ -22,9 +29,13 @@
   "content_scripts": [
     {
       "matches": ["https://notebook.google.com/*"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "css": ["content.css"]
     }
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "web_accessible_resources": [
     {
       "resources": ["icons/*"],
