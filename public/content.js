@@ -53,8 +53,8 @@ window.addEventListener('message', function(event) {
   }
 });
 
-// Inject core.js
-const mainScript = injectScript('modules/core.js');
+// Inject the main module script first
+injectScript('modules/core.js');
 
 // Send a message to the page after script injection to initialize
 setTimeout(() => {

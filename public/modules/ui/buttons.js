@@ -1,3 +1,4 @@
+
 // Button creation and injection for Voice to Text for Google NotebookLM
 
 /**
@@ -51,6 +52,9 @@ export function addSpeakButton(insertButton) {
     // Import startVoiceRecognition dynamically to avoid circular dependencies
     import('../voice/index.js').then(module => {
       module.startVoiceRecognition();
+    }).catch(error => {
+      console.error('Error loading voice recognition module:', error);
+      alert('Could not start voice recognition. Please try again.');
     });
   });
   
@@ -85,6 +89,9 @@ export function injectVoiceButton(targetElement) {
     // Import startVoiceRecognition dynamically to avoid circular dependencies
     import('../voice/index.js').then(module => {
       module.startVoiceRecognition();
+    }).catch(error => {
+      console.error('Error loading voice recognition module:', error);
+      alert('Could not start voice recognition. Please try again.');
     });
   });
   

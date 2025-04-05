@@ -1,7 +1,7 @@
 
 // DOM Observer functionality for Google NotebookLM
 import { logCurrentDOM, findAddMaterialDialog, findAddSourceButtons, findNotebookUI } from './dom-utils.js';
-import { addSpeakButton, injectVoiceButton } from './ui-components.js';
+import { addSpeakButton, injectVoiceButton } from './ui/buttons.js';
 
 /**
  * Watch for changes to detect notebook UI
