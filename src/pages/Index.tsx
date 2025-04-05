@@ -15,12 +15,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <header className="max-w-md mx-auto mb-6">
+      <header className="max-w-xl mx-auto mb-6">
         <h1 className="text-xl md:text-2xl font-bold mb-2 text-center">Voice to Text for Google NotebookLM</h1>
         <p className="text-center text-muted-foreground text-sm">Add source material using voice dictation</p>
       </header>
 
-      <main className="max-w-md mx-auto">
+      <main className="max-w-xl mx-auto">
         <SettingsPanel onSettingsChange={handleSettingsChange} />
         
         <div className="mt-6 text-center">
