@@ -1,4 +1,3 @@
-
 // DOM Observer functionality for Google NotebookLM
 
 /**
@@ -58,6 +57,7 @@ function observeForNotebookUI() {
         newButton.setAttribute('mat-flat-button', '');
         newButton.setAttribute('color', 'primary');
         newButton.className = 'mdc-button mat-mdc-button-base mdc-button--unelevated mat-mdc-unelevated-button mat-primary speech-to-text-button';
+        newButton.style.marginBottom = '10px';
 
         // Create child elements for the button
         const rippleSpan = document.createElement('span');
