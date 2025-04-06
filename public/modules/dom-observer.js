@@ -1,128 +1,101 @@
-
 // DOM Observer functionality for Google NotebookLM
 
 /**
  * Watch for changes to detect notebook UI
  */
 function observeForNotebookUI() {
-  // console.log('Setting up mutation observer for NotebookLM UI');
-  
-  // Debug the initial DOM to understand structure
-  // window.debugDOMStructure();
-  
   const observer = new MutationObserver((mutations) => {
-    // Periodically log structure to debug
-    // if (Math.random() < 0.05) {
-    //   window.debugDOMStructure();
-    // }
-    
     const dialogContainer = document.querySelector('mat-dialog-container[role="dialog"].mat-mdc-dialog-container');
 
     if (dialogContainer) {
-      console.log('Found dialog container:', dialogContainer);
-      // Find the span element with the text "Paste text"
-      const spanElement = dialogContainer.querySelector('span');
-      
-      if (spanElement && spanElement.textContent.trim() === 'Paste text') {
-        // Change the text to "Text"
-        spanElement.textContent = 'Text';
-        console.log('Updated span text to "Text"');
-      } else {
-        console.log('Span with text "Paste text" not found');
-      }
-    }
-
-    /*
-
-    // Look for the dialog that appears when adding text
-    const addMaterialDialog = document.querySelector('div[role="dialog"]');
-    if (addMaterialDialog) {
-      console.log('Found add material dialog:', addMaterialDialog);
-      
-      // Find the header text to change in the dialog
-      const headers = Array.from(addMaterialDialog.querySelectorAll('h1, h2, h3, h4, h5, h6'));
-      const pasteTextHeader = headers.find(header => {
-        const headerText = header.textContent.trim();
-        return headerText === 'Paste copied text' || 
-               headerText === 'Paste text' || 
-               headerText.includes('Copied text');
-      });
-      
-      if (pasteTextHeader) {
-        console.log('Found paste text header:', pasteTextHeader.textContent);
-        
-        // Check if we've already modified it
-        if (!pasteTextHeader.hasAttribute('data-modified')) {
-          console.log('Changing header from:', pasteTextHeader.textContent, 'to: Text or Speech');
-          
-          // Find the actual text element
-          const textElements = pasteTextHeader.querySelectorAll('span');
-          let targetElement = pasteTextHeader;
-          
-          if (textElements.length > 0) {
-            // Find the span that contains the text
-            for (const span of textElements) {
-              if (span.textContent.trim() === 'Paste copied text') {
-                targetElement = span;
-                break;
-              }
-            }
-          }
-          
-          // Update the text content
-          targetElement.textContent = 'Text or Speech';
-          pasteTextHeader.setAttribute('data-modified', 'true');
-          console.log('Successfully changed header to "Text or Speech"');
-        }
-      }
-      
-      // Use the specific selector for the Insert button
-      const insertButton = addMaterialDialog.querySelector('button[mat-flat-button][type="submit"]');
-      
-      if (insertButton) {
-        console.log('Found Insert button with specific selector:', insertButton);
-        
-        // Check if we've already added our button
-        const speakButtonExists = insertButton.parentElement?.querySelector('.voice-to-text-speak-button');
-        if (!speakButtonExists) {
-          console.log('Adding Speak button next to Insert button');
-          
-          // Add the Speak button with a slight delay to ensure the DOM is stable
-          setTimeout(() => {
-            window.addSpeakButton(insertButton);
-          }, 100);
-        }
-      } else {
-        console.log('Insert button not found with specific selector, trying alternative selectors');
-        
-        // Fallback to other selectors if needed
-        const fallbackInsertButton = Array.from(addMaterialDialog.querySelectorAll('button')).find(button => {
-          return button.textContent.trim() === 'Insert';
-        });
-        
-        if (fallbackInsertButton && !fallbackInsertButton.parentElement?.querySelector('.voice-to-text-speak-button')) {
-          console.log('Found Insert button with fallback selector:', fallbackInsertButton);
-          setTimeout(() => {
-            window.addSpeakButton(fallbackInsertButton);
-          }, 100);
-        }
-      }
-    }
+      // Find the span element containing the text "Paste text"
+      const spanElementPT = Array.from(dialogContainer.querySelectorAll('span')).find(
+        (span) => span.textContent.trim() === 'Paste text'
+      );
     
-    // Do NOT add the Voice to Text button in the main interface anymore
-    */
+      // Replace the text if the span element is found
+      if (spanElementPT) {
+        spanElementPT.textContent = 'Text';
+        console.log('Replaced "Paste text" with "Text".');
+      } else {
+        console.log('Span with text "Paste text" not found.');
+      }
+
+      // Find the span element containing the text "Paste text"
+      const spanElement = Array.from(dialogContainer.querySelectorAll('span')).find(
+        (span) => span.textContent.trim() === 'Copied text'
+      );
+    
+      // Replace the text if the span element is found
+      if (spanElement) {
+        spanElement.textContent = 'Paste or Speech';
+        console.log('Replaced "Copied text" with "Paste or Speech".');
+      } else {
+        console.log('Span with text "Copied text" not found.');
+      }
+      
+      // Select the button with the text "Insert"
+      const insertButton = Array.from(dialogContainer.querySelectorAll('button')).find(
+        (button) => button.textContent.trim() === 'Insert'
+      );
+
+      if (insertButton) {
+        console.log('Found the Insert button:', insertButton);
+
+        // Check if the "Speech to Text" button already exists
+        const existingButton = insertButton.parentElement?.querySelector('.speech-to-text-button');
+        if (existingButton) {
+          console.log('Speech to Text button already exists. Skipping addition.');
+          return;
+        }
+
+        // Create the new button element
+        const newButton = document.createElement('button');
+        newButton.setAttribute('type', 'button');
+        newButton.setAttribute('mat-flat-button', '');
+        newButton.setAttribute('color', 'primary');
+        newButton.className = 'mdc-button mat-mdc-button-base mdc-button--unelevated mat-mdc-unelevated-button mat-primary speech-to-text-button';
+
+        // Create child elements for the button
+        const rippleSpan = document.createElement('span');
+        rippleSpan.className = 'mat-mdc-button-persistent-ripple mdc-button__ripple';
+
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'mdc-button__label';
+        labelSpan.textContent = 'Speech to Text';
+
+        const focusIndicatorSpan = document.createElement('span');
+        focusIndicatorSpan.className = 'mat-focus-indicator';
+
+        const touchTargetSpan = document.createElement('span');
+        touchTargetSpan.className = 'mat-mdc-button-touch-target';
+
+        // Append child elements to the button
+        newButton.appendChild(rippleSpan);
+        newButton.appendChild(labelSpan);
+        newButton.appendChild(focusIndicatorSpan);
+        newButton.appendChild(touchTargetSpan);
+
+        // Append the new button to the form or desired parent element
+        if (insertButton && insertButton.parentElement) {
+          insertButton.parentElement.appendChild(newButton);
+          console.log('Speech to Text button added.');
+        }
+      } else {
+        console.error('Insert button not found!');
+      }
+    } else {
+      console.log('Dialog container not found.');
+    }
   });
-  
+
   // Observe all changes to the DOM
   observer.observe(document.body, {
     childList: true,
     subtree: true,
     attributes: true,
-    characterData: true
+    characterData: true,
   });
-  
-  // Initial check for UI elements (only once at the beginning)
-  setTimeout(window.debugDOMStructure, 2000);
 }
 
 /**
@@ -181,7 +154,7 @@ function debugDOMStructure() {
  * This function is now deprecated - we'll focus only on the dialog
  */
 function identifyAndInjectVoiceButton() {
-  console.log('identifyAndInjectVoiceButton is now deprecated');
+  // console.log('identsifyAndInjectVoiceButton is now deprecated');
   // We're not adding the button to the main interface anymore
 }
 
