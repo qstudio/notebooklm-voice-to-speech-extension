@@ -1,4 +1,3 @@
-
 // Dialog-specific voice recognition for Google NotebookLM
 
 /**
@@ -7,7 +6,7 @@
  * @returns {void}
  */
 function startVoiceRecognitionForDialog(inputField) {
-  console.log('Starting voice recognition for dialog input field');
+  // console.log('Starting voice recognition for dialog input field');
   
   // Check if browser supports speech recognition
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -17,7 +16,7 @@ function startVoiceRecognitionForDialog(inputField) {
   
   // If there's already an active recognition, stop it first
   if (window.currentDialogRecognition) {
-    console.log('Stopping previous recognition session');
+    // console.log('Stopping previous recognition session');
     window.currentDialogRecognition.stop();
     window.currentDialogRecognition = null;
   }
@@ -65,7 +64,7 @@ function startVoiceRecognitionForDialog(inputField) {
     recordingIndicator.appendChild(stopButton);
     
     document.body.appendChild(recordingIndicator);
-    console.log('Recording indicator added to DOM');
+    // console.log('Recording indicator added to DOM');
     
     // Initialize speech recognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -84,17 +83,17 @@ function startVoiceRecognitionForDialog(inputField) {
     
     // Event handlers
     recognition.onstart = () => {
-      console.log('Recognition started');
+      // console.log('Recognition started');
     };
     
     recognition.onresult = (event) => {
-      console.log('Recognition result received', event);
+      // console.log('Recognition result received', event);
       currentTranscript = '';
       for (let i = 0; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
       }
       
-      console.log('Current transcript:', currentTranscript);
+      // console.log('Current transcript:', currentTranscript);
       
       // Update the input field with the transcript
       if (inputField && inputField.tagName) {
@@ -109,27 +108,27 @@ function startVoiceRecognitionForDialog(inputField) {
           inputField.appendChild(document.createTextNode(currentTranscript));
           inputField.dispatchEvent(new Event('input', { bubbles: true }));
         } else {
-          console.warn('Input field is neither input/textarea nor contenteditable:', inputField);
+          // console.warn('Input field is neither input/textarea nor contenteditable:', inputField);
         }
       } else {
-        console.error('Input field is not valid:', inputField);
+        // console.error('Input field is not valid:', inputField);
       }
     };
     
     recognition.onerror = (event) => {
-      console.error('Recognition error:', event.error);
+      // console.error('Recognition error:', event.error);
       alert(`Speech recognition error: ${event.error}`);
       cleanup();
     };
     
     recognition.onend = () => {
-      console.log('Recognition ended');
+      // console.log('Recognition ended');
       cleanup();
     };
     
     // Function to clean up
     function cleanup() {
-      console.log('Cleaning up recognition resources');
+      // console.log('Cleaning up recognition resources');
       if (recordingIndicator && recordingIndicator.parentNode) {
         recordingIndicator.parentNode.removeChild(recordingIndicator);
       }
@@ -144,7 +143,7 @@ function startVoiceRecognitionForDialog(inputField) {
     
     // Stop button handler
     stopButton.addEventListener('click', () => {
-      console.log('Stop button clicked');
+      // console.log('Stop button clicked');
       recognition.stop();
     });
     
@@ -159,9 +158,9 @@ function startVoiceRecognitionForDialog(inputField) {
         });
         
         if (insertButton) {
-          console.log('Found Insert button, adding stop recognition event');
+          // console.log('Found Insert button, adding stop recognition event');
           insertButton.addEventListener('click', function() {
-            console.log('Insert button clicked, stopping recognition');
+            // console.log('Insert button clicked, stopping recognition');
             if (window.currentDialogRecognition) {
               window.currentDialogRecognition.stop();
             }
@@ -175,9 +174,9 @@ function startVoiceRecognitionForDialog(inputField) {
         });
         
         if (cancelButton) {
-          console.log('Found Cancel button, adding stop recognition event');
+          // console.log('Found Cancel button, adding stop recognition event');
           cancelButton.addEventListener('click', function() {
-            console.log('Cancel button clicked, stopping recognition');
+            // console.log('Cancel button clicked, stopping recognition');
             if (window.currentDialogRecognition) {
               window.currentDialogRecognition.stop();
             }
@@ -189,23 +188,23 @@ function startVoiceRecognitionForDialog(inputField) {
     // First request microphone permission explicitly
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
-        console.log('Microphone permission granted');
+        // console.log('Microphone permission granted');
         
         // Close the stream immediately as we don't need it, just the permission
         stream.getTracks().forEach(track => track.stop());
         
         // Start recording after permission is granted
         recognition.start();
-        console.log('Recognition started after permission granted');
+        // console.log('Recognition started after permission granted');
       })
       .catch(err => {
-        console.error('Microphone permission denied:', err);
+        // console.error('Microphone permission denied:', err);
         alert('You need to allow microphone access for voice recognition to work.');
         cleanup();
       });
     
   } catch (error) {
-    console.error('Error initializing dialog voice recognition:', error);
+    // console.error('Error initializing dialog voice recognition:', error);
     alert('Failed to start voice recognition: ' + error.message);
   }
 }
