@@ -1,4 +1,3 @@
-
 // DOM Observer functionality for Google NotebookLM
 
 /**
@@ -9,42 +8,13 @@ function observeForNotebookUI() {
     const dialogContainer = document.querySelector('mat-dialog-container[role="dialog"].mat-mdc-dialog-container');
 
     if (dialogContainer) {
-      // Find the span element containing the text "Paste text"
-      const spanElementPT = Array.from(dialogContainer.querySelectorAll('span')).find(
-        (span) => span.textContent.trim() === 'Paste text'
-      );
-    
-      // Replace the text if the span element is found
-      if (spanElementPT) {
-        spanElementPT.textContent = 'Text';
-        console.log('Replaced "Paste text" with "Text".');
-      } else {
-        console.log('Span with text "Paste text" not found.');
-      }
+      const formField = dialogContainer.querySelector('mat-form-field');
 
-      // Find the span element containing the text "Paste text"
-      const spanElement = Array.from(dialogContainer.querySelectorAll('span')).find(
-        (span) => span.textContent.trim() === 'Copied text'
-      );
-    
-      // Replace the text if the span element is found
-      if (spanElement) {
-        spanElement.textContent = 'Paste or Speech';
-        console.log('Replaced "Copied text" with "Paste or Speech".');
-      } else {
-        console.log('Span with text "Copied text" not found.');
-      }
-      
-      // Select the button with the text "Insert"
-      const insertButton = Array.from(dialogContainer.querySelectorAll('button')).find(
-        (button) => button.textContent.trim() === 'Insert'
-      );
-
-      if (insertButton) {
-        console.log('Found the Insert button:', insertButton);
+      if (formField) {
+        console.log('Found the mat-form-field:', formField);
 
         // Check if the "Speech to Text" button already exists
-        const existingButton = insertButton.parentElement?.querySelector('.speech-to-text-button');
+        const existingButton = dialogContainer.querySelector('.speech-to-text-button');
         if (existingButton) {
           console.log('Speech to Text button already exists. Skipping addition.');
           return;
@@ -77,37 +47,11 @@ function observeForNotebookUI() {
         newButton.appendChild(focusIndicatorSpan);
         newButton.appendChild(touchTargetSpan);
 
-        // Add click event handler for voice recognition
-        newButton.addEventListener('click', function() {
-          // Find the textarea input field within the dialog
-          const dialogInputField = dialogContainer.querySelector('textarea, input[type="text"], [contenteditable="true"]');
-          
-          if (dialogInputField) {
-            console.log('Found dialog input field, starting voice recognition');
-            
-            // Set a data attribute to track the active field
-            dialogInputField.setAttribute('data-speech-target', 'true');
-            
-            // Start voice recognition with the dialog context
-            if (typeof window.startVoiceRecognitionForDialog === 'function') {
-              window.startVoiceRecognitionForDialog(dialogInputField);
-            } else {
-              console.error('startVoiceRecognitionForDialog function not available');
-              alert('Speech recognition functionality not available. Please try refreshing the page.');
-            }
-          } else {
-            console.error('No input field found in dialog');
-            alert('Could not find where to add the text. Please try again.');
-          }
-        });
-
-        // Append the new button to the form or desired parent element
-        if (insertButton && insertButton.parentElement) {
-          insertButton.parentElement.appendChild(newButton);
-          console.log('Speech to Text button added.');
-        }
+        // Insert the new button before the mat-form-field
+        formField.parentElement.insertBefore(newButton, formField);
+        console.log('Speech to Text button added before the mat-form-field.');
       } else {
-        console.error('Insert button not found!');
+        console.error('mat-form-field not found!');
       }
     } else {
       console.log('Dialog container not found.');
@@ -187,4 +131,3 @@ function identifyAndInjectVoiceButton() {
 window.observeForNotebookUI = observeForNotebookUI;
 // window.debugDOMStructure = debugDOMStructure;
 // window.identifyAndInjectVoiceButton = identifyAndInjectVoiceButton;
-
