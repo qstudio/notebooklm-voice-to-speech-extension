@@ -20,7 +20,7 @@ const Index = () => {
         <p className="text-center text-muted-foreground text-sm">Add source material using voice dictation</p>
       </header>
 
-      <main className="max-w-xl mx-auto">
+      <main className="w-[90%] md:w-[600px] mx-auto">
         <SettingsPanel onSettingsChange={handleSettingsChange} />
         
         <div className="mt-6 text-center">
