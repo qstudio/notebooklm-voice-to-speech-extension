@@ -1,3 +1,4 @@
+
 // Core functionality for Voice to Text for Google NotebookLM
 
 (function() {
@@ -25,24 +26,23 @@
    * Check if all required dependencies are loaded and initialize
    */
   function checkDependenciesAndInit() {
-    // console.log('Checking for dependencies...');
+    console.log('Checking for dependencies...');
     
     const requiredFunctions = [
       'observeForNotebookUI',
       'addSpeakButton',
-      'injectVoiceButton',
-      'startVoiceRecognition'
+      'startVoiceRecognitionForDialog'
     ];
     
     const missingFunctions = requiredFunctions.filter(fn => typeof window[fn] !== 'function');
     
     if (missingFunctions.length === 0) {
-      // console.log('All dependencies loaded, starting observer');
+      console.log('All dependencies loaded, starting observer');
       window.observeForNotebookUI();
     } else {
       console.warn('Some dependencies are not loaded yet:', missingFunctions);
-      // console.log('Retrying in 500ms...');
-      setTimeout(checkDependenciesAndInit, 500);
+      console.log('Retrying in 1000ms...');
+      setTimeout(checkDependenciesAndInit, 1000);
     }
   }
   

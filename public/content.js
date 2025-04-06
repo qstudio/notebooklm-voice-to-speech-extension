@@ -125,7 +125,7 @@ async function injectAllScripts() {
     await injectScript('modules/ui/text-insertion.js');
     await injectScript('modules/ui/recorder-dialog.js');
     
-    // Then inject voice modules
+    // Then inject voice modules (note the changed order - dialog-recognition first)
     await injectScript('modules/voice/dialog-recognition.js');
     await injectScript('modules/voice/recognition-setup.js');
     await injectScript('modules/voice/ui-event-handlers.js');
@@ -146,9 +146,9 @@ async function injectAllScripts() {
         type: 'FROM_CONTENT_SCRIPT', 
         action: 'initialize' 
       }, '*');
-    }, 1500); // Increased timeout to ensure all scripts are fully processed
+    }, 2000); // Increased timeout to ensure all scripts are fully processed
   } catch (error) {
-    // console.error('Error injecting scripts:', error);
+    console.error('Error injecting scripts:', error);
   }
 }
 

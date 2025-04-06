@@ -64,9 +64,12 @@ function startVoiceRecognition() {
   });
 }
 
-// Export the dialog-specific function
-const startVoiceRecognitionForDialog = window.startVoiceRecognitionForDialog;
+// Make the dialog-specific function available globally
+const startVoiceRecognitionForDialog = window.startVoiceRecognitionForDialog || function() {
+  console.error('startVoiceRecognitionForDialog not yet loaded');
+  alert('Speech recognition is still loading. Please try again in a moment.');
+};
 
 // Make functions globally available
 window.startVoiceRecognition = startVoiceRecognition;
-
+window.startVoiceRecognitionForDialog = startVoiceRecognitionForDialog;

@@ -117,5 +117,6 @@ function startVoiceRecognitionForDialog(inputField) {
   });
 }
 
-// Make the function globally available
+// Make the function globally available immediately
 window.startVoiceRecognitionForDialog = startVoiceRecognitionForDialog;
+

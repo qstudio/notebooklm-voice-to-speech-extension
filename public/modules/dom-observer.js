@@ -1,3 +1,4 @@
+
 // DOM Observer functionality for Google NotebookLM
 
 /**
@@ -46,6 +47,29 @@ function observeForNotebookUI() {
         newButton.appendChild(labelSpan);
         newButton.appendChild(focusIndicatorSpan);
         newButton.appendChild(touchTargetSpan);
+
+        // Add click event handler to the button
+        newButton.addEventListener('click', () => {
+          console.log('Speech to Text button clicked');
+          
+          // Find the input field in the dialog
+          const inputField = dialogContainer.querySelector('textarea, input[type="text"], [contenteditable="true"]');
+          
+          if (inputField) {
+            console.log('Found input field, starting voice recognition');
+            
+            // Call the dialog-specific voice recognition function
+            if (typeof window.startVoiceRecognitionForDialog === 'function') {
+              window.startVoiceRecognitionForDialog(inputField);
+            } else {
+              console.error('startVoiceRecognitionForDialog function not available');
+              alert('Speech recognition is not available. Please try again later.');
+            }
+          } else {
+            console.error('Could not find input field in dialog');
+            alert('Could not find the input field. Please try again.');
+          }
+        });
 
         // Insert the new button before the mat-form-field
         formField.parentElement.insertBefore(newButton, formField);
