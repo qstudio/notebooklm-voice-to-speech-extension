@@ -5,17 +5,34 @@
  * Watch for changes to detect notebook UI
  */
 function observeForNotebookUI() {
-  console.log('Setting up mutation observer for NotebookLM UI');
+  // console.log('Setting up mutation observer for NotebookLM UI');
   
   // Debug the initial DOM to understand structure
-  window.debugDOMStructure();
+  // window.debugDOMStructure();
   
   const observer = new MutationObserver((mutations) => {
     // Periodically log structure to debug
-    if (Math.random() < 0.05) {
-      window.debugDOMStructure();
-    }
+    // if (Math.random() < 0.05) {
+    //   window.debugDOMStructure();
+    // }
     
+    const dialogContainer = document.querySelector('mat-dialog-container[role="dialog"].mat-mdc-dialog-container');
+
+    if (dialogContainer) {
+      // Find the span element with the text "Paste text"
+      const spanElement = dialogContainer.querySelector('span');
+      
+      if (spanElement && spanElement.textContent.trim() === 'Paste text') {
+        // Change the text to "Text"
+        spanElement.textContent = 'Text';
+        console.log('Updated span text to "Text"');
+      } else {
+        console.log('Span with text "Paste text" not found');
+      }
+    }
+
+    /*
+
     // Look for the dialog that appears when adding text
     const addMaterialDialog = document.querySelector('div[role="dialog"]');
     if (addMaterialDialog) {
@@ -92,6 +109,7 @@ function observeForNotebookUI() {
     }
     
     // Do NOT add the Voice to Text button in the main interface anymore
+    */
   });
   
   // Observe all changes to the DOM
@@ -168,5 +186,5 @@ function identifyAndInjectVoiceButton() {
 
 // Make functions globally available
 window.observeForNotebookUI = observeForNotebookUI;
-window.debugDOMStructure = debugDOMStructure;
-window.identifyAndInjectVoiceButton = identifyAndInjectVoiceButton;
+// window.debugDOMStructure = debugDOMStructure;
+// window.identifyAndInjectVoiceButton = identifyAndInjectVoiceButton;
