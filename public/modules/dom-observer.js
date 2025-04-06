@@ -19,6 +19,7 @@ function observeForNotebookUI() {
     const dialogContainer = document.querySelector('mat-dialog-container[role="dialog"].mat-mdc-dialog-container');
 
     if (dialogContainer) {
+      console.log('Found dialog container:', dialogContainer);
       // Find the span element with the text "Paste text"
       const spanElement = dialogContainer.querySelector('span');
       

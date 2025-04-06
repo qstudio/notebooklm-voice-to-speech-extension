@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -19,7 +18,7 @@ const removeGptEngineerScript = () => {
         html = html.replace(/<script src="https:\/\/cdn\.gpteng\.co\/gptengineer\.js".*?><\/script>/g, '<!-- GPT Engineer script removed for production build -->');
         // Write the modified file
         writeFileSync(htmlPath, html);
-        console.log('Successfully removed GPT Engineer script from production build');
+        // console.log('Successfully removed GPT Engineer script from production build');
       } catch (error) {
         console.error('Error removing GPT Engineer script:', error);
       }

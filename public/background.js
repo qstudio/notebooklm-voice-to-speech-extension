@@ -1,9 +1,8 @@
-
 // Voice to Text for Google NotebookLM - Background Script
 
 // Set up initial state
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Voice to Text for Google NotebookLM extension installed');
+  // console.log('Voice to Text for Google NotebookLM extension installed');
   
   // Set default options
   chrome.storage.local.set({
@@ -17,7 +16,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // Listen for messages from popup or content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Background script received message:', request);
+  // console.log('Background script received message:', request);
   
   // Handle getting settings
   if (request.action === "getSettings") {
@@ -43,4 +42,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-console.log('Voice to Text for Google NotebookLM background script loaded');
+// console.log('Voice to Text for Google NotebookLM background script loaded');
