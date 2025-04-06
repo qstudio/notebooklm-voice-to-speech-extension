@@ -27,7 +27,21 @@ function startVoiceRecognitionForDialog(inputField) {
     recordingIndicator.style.color = 'white';
     recordingIndicator.style.borderRadius = '4px';
     recordingIndicator.style.zIndex = '10000';
-    recordingIndicator.innerHTML = '<span style="display: inline-block; width: 12px; height: 12px; background-color: white; border-radius: 50%; margin-right: 8px; animation: pulse 1.5s infinite;"></span> Recording...';
+    
+    // Create indicator span using DOM methods instead of innerHTML
+    const pulseSpan = document.createElement('span');
+    pulseSpan.style.display = 'inline-block';
+    pulseSpan.style.width = '12px';
+    pulseSpan.style.height = '12px';
+    pulseSpan.style.backgroundColor = 'white';
+    pulseSpan.style.borderRadius = '50%';
+    pulseSpan.style.marginRight = '8px';
+    pulseSpan.style.animation = 'pulse 1.5s infinite';
+    
+    const textNode = document.createTextNode(' Recording...');
+    
+    recordingIndicator.appendChild(pulseSpan);
+    recordingIndicator.appendChild(textNode);
     recordingIndicator.style.fontFamily = 'Google Sans, Arial, sans-serif';
     recordingIndicator.style.fontSize = '14px';
     
@@ -55,16 +69,6 @@ function startVoiceRecognitionForDialog(inputField) {
     recognition.interimResults = true;
     recognition.lang = 'en-US'; // Default to English
     
-    // Try to get user's preferred language if available
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(['voiceSettings'], (result) => {
-        if (result && result.voiceSettings && result.voiceSettings.language) {
-          recognition.lang = result.voiceSettings.language;
-          console.log('Using speech recognition language:', recognition.lang);
-        }
-      });
-    }
-    
     // Current transcript
     let currentTranscript = '';
     
@@ -87,10 +91,15 @@ function startVoiceRecognitionForDialog(inputField) {
         if (inputField.tagName === 'TEXTAREA' || inputField.tagName === 'INPUT') {
           inputField.value = currentTranscript;
           inputField.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-          // Handle contenteditable
-          inputField.innerHTML = currentTranscript;
+        } else if (inputField.isContentEditable) {
+          // Handle contenteditable safely without using innerHTML
+          while (inputField.firstChild) {
+            inputField.removeChild(inputField.firstChild);
+          }
+          inputField.appendChild(document.createTextNode(currentTranscript));
           inputField.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          console.warn('Input field is neither input/textarea nor contenteditable:', inputField);
         }
       } else {
         console.error('Input field is not valid:', inputField);
