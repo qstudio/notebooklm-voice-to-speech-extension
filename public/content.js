@@ -1,3 +1,4 @@
+
 // Voice to Text for Google NotebookLM - Content Script
 
 // console.log('Voice to Text for Google NotebookLM content script loaded');
@@ -50,6 +51,10 @@ style.textContent = `
     0% { opacity: 1; }
     50% { opacity: 0.4; }
     100% { opacity: 1; }
+  }
+  
+  .dialog-recording-indicator span {
+    animation: pulse 1.5s infinite;
   }
 `;
 document.head.appendChild(style);
@@ -121,6 +126,7 @@ async function injectAllScripts() {
     await injectScript('modules/ui/recorder-dialog.js');
     
     // Then inject voice modules
+    await injectScript('modules/voice/dialog-recognition.js');
     await injectScript('modules/voice/recognition-setup.js');
     await injectScript('modules/voice/ui-event-handlers.js');
     await injectScript('modules/voice/index.js');

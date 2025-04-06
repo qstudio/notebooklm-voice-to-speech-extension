@@ -1,3 +1,4 @@
+
 // DOM Observer functionality for Google NotebookLM
 
 /**
@@ -75,6 +76,30 @@ function observeForNotebookUI() {
         newButton.appendChild(labelSpan);
         newButton.appendChild(focusIndicatorSpan);
         newButton.appendChild(touchTargetSpan);
+
+        // Add click event handler for voice recognition
+        newButton.addEventListener('click', function() {
+          // Find the textarea input field within the dialog
+          const dialogInputField = dialogContainer.querySelector('textarea, input[type="text"], [contenteditable="true"]');
+          
+          if (dialogInputField) {
+            console.log('Found dialog input field, starting voice recognition');
+            
+            // Set a data attribute to track the active field
+            dialogInputField.setAttribute('data-speech-target', 'true');
+            
+            // Start voice recognition with the dialog context
+            if (typeof window.startVoiceRecognitionForDialog === 'function') {
+              window.startVoiceRecognitionForDialog(dialogInputField);
+            } else {
+              console.error('startVoiceRecognitionForDialog function not available');
+              alert('Speech recognition functionality not available. Please try refreshing the page.');
+            }
+          } else {
+            console.error('No input field found in dialog');
+            alert('Could not find where to add the text. Please try again.');
+          }
+        });
 
         // Append the new button to the form or desired parent element
         if (insertButton && insertButton.parentElement) {
@@ -162,3 +187,4 @@ function identifyAndInjectVoiceButton() {
 window.observeForNotebookUI = observeForNotebookUI;
 // window.debugDOMStructure = debugDOMStructure;
 // window.identifyAndInjectVoiceButton = identifyAndInjectVoiceButton;
+

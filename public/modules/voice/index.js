@@ -64,5 +64,9 @@ function startVoiceRecognition() {
   });
 }
 
-// Make the function globally available
+// Export the dialog-specific function
+const startVoiceRecognitionForDialog = window.startVoiceRecognitionForDialog;
+
+// Make functions globally available
 window.startVoiceRecognition = startVoiceRecognition;
+
