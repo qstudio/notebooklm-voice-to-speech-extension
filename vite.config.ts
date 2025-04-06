@@ -20,7 +20,7 @@ const removeGptEngineerScript = () => {
         writeFileSync(htmlPath, html);
         // console.log('Successfully removed GPT Engineer script from production build');
       } catch (error) {
-        console.error('Error removing GPT Engineer script:', error);
+        console.log('Error removing GPT Engineer script:', error);
       }
     }
   };

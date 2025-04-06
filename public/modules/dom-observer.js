@@ -93,11 +93,11 @@ function observeForNotebookUI() {
             if (typeof window.startVoiceRecognitionForDialog === 'function') {
               window.startVoiceRecognitionForDialog(inputField);
             } else {
-              console.error('startVoiceRecognitionForDialog function not available');
+              console.log('startVoiceRecognitionForDialog function not available');
               alert('Speech recognition is not available. Please try again later.');
             }
           } else {
-            console.error('Could not find input field in dialog');
+            console.log('Could not find input field in dialog');
             alert('Could not find the input field. Please try again.');
           }
         });
@@ -106,7 +106,7 @@ function observeForNotebookUI() {
         formField.parentElement.insertBefore(newButton, formField);
         // console.log('Speech to Text button added before the mat-form-field.');
       } else {
-        console.error('mat-form-field not found!');
+        console.log('mat-form-field not found!');
       }
     } 
     // If dialog was present but now it's gone, stop any active recording

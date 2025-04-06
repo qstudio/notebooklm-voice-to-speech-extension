@@ -39,7 +39,7 @@
       // console.log('All dependencies loaded, starting observer');
       window.observeForNotebookUI();
     } else {
-      console.warn('Some dependencies are not loaded yet:', missingFunctions);
+      console.log('Some dependencies are not loaded yet:', missingFunctions);
       // console.log('Retrying in 1000ms...');
       setTimeout(checkDependenciesAndInit, 1000);
     }

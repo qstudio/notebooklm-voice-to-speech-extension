@@ -77,7 +77,7 @@ function injectScript(file) {
     };
     
     script.onerror = function(error) {
-      console.error(`Error loading script ${file}:`, error);
+      console.log(`Error loading script ${file}:`, error);
       reject(error);
     };
     
@@ -111,7 +111,7 @@ window.addEventListener('message', function(event) {
           }, '*');
         })
         .catch(error => {
-          console.error('Error sending message to background:', error);
+          console.log('Error sending message to background:', error);
         });
     }
   }
@@ -152,7 +152,7 @@ async function injectAllScripts() {
       }, '*');
     }, 2500); // Increased timeout to ensure all scripts are fully processed
   } catch (error) {
-    console.error('Error injecting scripts:', error);
+    console.log('Error injecting scripts:', error);
   }
 }
 
