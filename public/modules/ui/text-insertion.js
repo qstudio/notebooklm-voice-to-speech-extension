@@ -42,6 +42,14 @@ function addTextToNotebook(text) {
         if (submitButton) {
           console.log('Found submit button in dialog, clicking it');
           submitButton.click();
+          
+          // Stop any active speech recognition
+          if (window.currentDialogRecognition) {
+            console.log('Stopping active speech recognition after text submission');
+            window.currentDialogRecognition.stop();
+            window.currentDialogRecognition = null;
+          }
+          
           alert('Text added successfully!');
         } else {
           console.log('Could not find submit button in dialog');
@@ -81,10 +89,15 @@ function addTextToNotebook(text) {
         if (inputField.tagName === 'TEXTAREA' || inputField.tagName === 'INPUT') {
           inputField.value = text;
           inputField.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-          // Handle contenteditable
-          inputField.innerHTML = text;
+        } else if (inputField.isContentEditable) {
+          // Handle contenteditable safely without using innerHTML
+          while (inputField.firstChild) {
+            inputField.removeChild(inputField.firstChild);
+          }
+          inputField.appendChild(document.createTextNode(text));
           inputField.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          console.warn('Input field is neither input/textarea nor contenteditable:', inputField);
         }
         
         // Find submit button and click it
@@ -94,6 +107,14 @@ function addTextToNotebook(text) {
           if (submitButton) {
             console.log('Found submit button, clicking it');
             submitButton.click();
+            
+            // Stop any active speech recognition
+            if (window.currentDialogRecognition) {
+              console.log('Stopping active speech recognition after text submission');
+              window.currentDialogRecognition.stop();
+              window.currentDialogRecognition = null;
+            }
+            
             alert('Text added successfully!');
           } else {
             console.log('Could not find submit button');

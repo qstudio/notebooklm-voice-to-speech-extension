@@ -64,6 +64,9 @@ function startVoiceRecognitionForDialog(inputField) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     
+    // Store the recognition instance globally so it can be stopped later
+    window.currentDialogRecognition = recognition;
+    
     // Configure recognition
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -127,6 +130,9 @@ function startVoiceRecognitionForDialog(inputField) {
       if (inputField) {
         inputField.removeAttribute('data-speech-target');
       }
+      
+      // Clear the global recognition instance
+      window.currentDialogRecognition = null;
     }
     
     // Stop button handler
