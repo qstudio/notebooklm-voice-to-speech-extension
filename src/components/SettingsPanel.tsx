@@ -120,7 +120,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
           <Settings className="h-5 w-5" /> Extension Settings
         </CardTitle>
         <CardDescription>
-          Configure how Voice Scribe works with Google Notebook
+          Configure how Speech to Text works with Google NotebookLM
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
