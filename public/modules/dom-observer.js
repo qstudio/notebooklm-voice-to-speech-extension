@@ -9,6 +9,33 @@ function observeForNotebookUI() {
     const dialogContainer = document.querySelector('mat-dialog-container[role="dialog"].mat-mdc-dialog-container');
 
     if (dialogContainer) {
+
+      // Find the span element containing the text "Paste text"
+      const spanElementPT = Array.from(dialogContainer.querySelectorAll('span')).find(
+        (span) => span.textContent.trim() === 'Paste text'
+      );
+    
+      // Replace the text if the span element is found
+      if (spanElementPT) {
+        spanElementPT.textContent = 'Text';
+        console.log('Replaced "Paste text" with "Text".');
+      } else {
+        console.log('Span with text "Paste text" not found.');
+      }
+
+      // Find the span element containing the text "Paste text"
+      const spanElement = Array.from(dialogContainer.querySelectorAll('span')).find(
+        (span) => span.textContent.trim() === 'Copied text'
+      );
+    
+      // Replace the text if the span element is found
+      if (spanElement) {
+        spanElement.textContent = 'Paste or Speech';
+        console.log('Replaced "Copied text" with "Paste or Speech".');
+      } else {
+        console.log('Span with text "Copied text" not found.');
+      }
+
       const formField = dialogContainer.querySelector('mat-form-field');
 
       if (formField) {
