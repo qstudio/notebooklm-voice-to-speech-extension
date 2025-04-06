@@ -5,10 +5,14 @@
  * Watch for changes to detect notebook UI
  */
 function observeForNotebookUI() {
+  let dialogPresent = false;
+  
   const observer = new MutationObserver((mutations) => {
     const dialogContainer = document.querySelector('mat-dialog-container[role="dialog"].mat-mdc-dialog-container');
-
+    
+    // Track dialog state changes to detect when it closes
     if (dialogContainer) {
+      dialogPresent = true;
 
       // Find the span element containing the text "Paste text"
       const spanElementPT = Array.from(dialogContainer.querySelectorAll('span')).find(
@@ -23,7 +27,7 @@ function observeForNotebookUI() {
         console.log('Span with text "Paste text" not found.');
       }
 
-      // Find the span element containing the text "Paste text"
+      // Find the span element containing the text "Copied text"
       const spanElement = Array.from(dialogContainer.querySelectorAll('span')).find(
         (span) => span.textContent.trim() === 'Copied text'
       );
@@ -104,8 +108,18 @@ function observeForNotebookUI() {
       } else {
         console.error('mat-form-field not found!');
       }
-    } else {
-      console.log('Dialog container not found.');
+    } 
+    // If dialog was present but now it's gone, stop any active recording
+    else if (dialogPresent && !dialogContainer) {
+      dialogPresent = false;
+      console.log('Dialog closed - checking for active recording to stop');
+      
+      // Stop any active speech recognition
+      if (window.currentDialogRecognition) {
+        console.log('Stopping active speech recognition after dialog close');
+        window.currentDialogRecognition.stop();
+        window.currentDialogRecognition = null;
+      }
     }
   });
 

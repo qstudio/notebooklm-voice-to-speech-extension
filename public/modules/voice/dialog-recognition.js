@@ -15,6 +15,13 @@ function startVoiceRecognitionForDialog(inputField) {
     return;
   }
   
+  // If there's already an active recognition, stop it first
+  if (window.currentDialogRecognition) {
+    console.log('Stopping previous recognition session');
+    window.currentDialogRecognition.stop();
+    window.currentDialogRecognition = null;
+  }
+  
   try {
     // Create a simplified UI indicator for recording
     const recordingIndicator = document.createElement('div');
@@ -140,6 +147,44 @@ function startVoiceRecognitionForDialog(inputField) {
       console.log('Stop button clicked');
       recognition.stop();
     });
+    
+    // Add event listeners to Insert and Cancel buttons
+    setTimeout(() => {
+      const dialog = document.querySelector('mat-dialog-container[role="dialog"]');
+      if (dialog) {
+        // Find the Insert button
+        const insertButton = Array.from(dialog.querySelectorAll('button')).find(button => {
+          const text = button.textContent.trim();
+          return text === 'Insert' || text === 'Add';
+        });
+        
+        if (insertButton) {
+          console.log('Found Insert button, adding stop recognition event');
+          insertButton.addEventListener('click', function() {
+            console.log('Insert button clicked, stopping recognition');
+            if (window.currentDialogRecognition) {
+              window.currentDialogRecognition.stop();
+            }
+          });
+        }
+        
+        // Find the Cancel button
+        const cancelButton = Array.from(dialog.querySelectorAll('button')).find(button => {
+          const text = button.textContent.trim();
+          return text === 'Cancel';
+        });
+        
+        if (cancelButton) {
+          console.log('Found Cancel button, adding stop recognition event');
+          cancelButton.addEventListener('click', function() {
+            console.log('Cancel button clicked, stopping recognition');
+            if (window.currentDialogRecognition) {
+              window.currentDialogRecognition.stop();
+            }
+          });
+        }
+      }
+    }, 500);
     
     // First request microphone permission explicitly
     navigator.mediaDevices.getUserMedia({ audio: true })
