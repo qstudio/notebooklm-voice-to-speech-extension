@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, ClipboardCopy, Trash2 } from 'lucide-react';
 import LanguageSelector from '@/components/settings/LanguageSelector';
 import { useToast } from '@/hooks/use-toast';
 
@@ -30,6 +30,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
+  const [textAreaContent, setTextAreaContent] = useState('');
   const { toast } = useToast();
 
   // Handle recording control
@@ -45,6 +46,15 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
       }
       onStartListening();
       addDebugInfo(`Recording started with language: ${language}`);
+    }
+  };
+
+  // Handle textarea input (for manual typing)
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTextAreaContent(e.target.value);
+    // Save cursor position for future recording
+    if (textareaRef.current) {
+      setCursorPosition(textareaRef.current.selectionStart);
     }
   };
 
@@ -70,8 +80,8 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
 
   // Handle copy to clipboard
   const handleCopy = () => {
-    if (textareaRef.current?.value) {
-      navigator.clipboard.writeText(textareaRef.current.value)
+    if (textAreaContent) {
+      navigator.clipboard.writeText(textAreaContent)
         .then(() => {
           toast({
             title: "Copied to clipboard",
@@ -94,7 +104,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   useEffect(() => {
     if (isListening && transcript && textareaRef.current) {
       // Get current text and cursor position
-      const currentText = textareaRef.current.value;
+      const currentText = textAreaContent;
       const currentPosition = cursorPosition ?? currentText.length;
       
       // Insert transcript at cursor position
@@ -104,14 +114,19 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
         currentText.substring(currentPosition);
       
       // Update textarea value
-      textareaRef.current.value = newText;
+      setTextAreaContent(newText);
       
       // Move cursor to the end of the inserted text
       const newPosition = currentPosition + transcript.length;
-      textareaRef.current.setSelectionRange(newPosition, newPosition);
       
-      // Update cursor position for next insertion
-      setCursorPosition(newPosition);
+      // This will be done after the component updates
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newPosition, newPosition);
+          setCursorPosition(newPosition);
+        }
+      }, 0);
       
       addDebugInfo(`Transcript updated and inserted at position ${currentPosition}`);
     }
@@ -134,6 +149,8 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
             ref={textareaRef}
             placeholder="Start recording or type here..." 
             className="min-h-[200px] resize-none"
+            value={textAreaContent}
+            onChange={handleTextareaChange}
             onKeyDown={handleTextareaInteraction}
             onMouseDown={handleTextareaInteraction}
             onPaste={handleTextareaInteraction}
@@ -158,15 +175,21 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
           )}
         </Button>
         <div className="space-x-2">
-          <Button onClick={onClear} variant="outline">
-            Clear
+          <Button 
+            onClick={() => {
+              onClear();
+              setTextAreaContent('');
+            }} 
+            variant="outline"
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Clear
           </Button>
           <Button 
             onClick={handleCopy} 
             variant="outline" 
-            disabled={!textareaRef.current?.value}
+            disabled={!textAreaContent}
           >
-            Copy
+            <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
           </Button>
         </div>
       </CardFooter>

@@ -4,6 +4,9 @@ import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { useDebugInfo } from '@/hooks/use-debug-info';
 import SpeechRecognitionPanel from '@/components/speech/SpeechRecognitionPanel';
 import DebugInfoPanel from '@/components/speech/DebugInfoPanel';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const SpeechDemo: React.FC = () => {
   const [language, setLanguage] = useState('en-US');
@@ -51,6 +54,13 @@ const SpeechDemo: React.FC = () => {
     return (
       <div className="container py-10">
         <div className="w-full max-w-3xl mx-auto">
+          <div className="mb-4">
+            <Link to="/">
+              <Button variant="outline" size="sm" className="gap-1">
+                <ArrowLeft className="h-4 w-4" /> Back to Home
+              </Button>
+            </Link>
+          </div>
           <h2 className="text-2xl font-bold mb-4">Speech to Text Demo</h2>
           <p className="text-center mb-4">
             Sorry, your browser does not support the Web Speech API.
@@ -65,6 +75,14 @@ const SpeechDemo: React.FC = () => {
 
   return (
     <div className="container py-8">
+      <div className="mb-4">
+        <Link to="/">
+          <Button variant="outline" size="sm" className="gap-1">
+            <ArrowLeft className="h-4 w-4" /> Back to Home
+          </Button>
+        </Link>
+      </div>
+      
       <h1 className="text-2xl font-bold mb-6 text-center">Speech to Text Demo</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
