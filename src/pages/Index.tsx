@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import SettingsPanel from '@/components/SettingsPanel';
 import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Mic } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const [language, setLanguage] = useState('en-US');
@@ -30,6 +33,13 @@ const Index = () => {
           <p className="text-sm text-muted-foreground mt-1">
             Look for the "Speak" button when adding source material.
           </p>
+          
+          <Link to="/demo" className="mt-4 inline-block">
+            <Button variant="outline" className="gap-2">
+              <Mic className="h-4 w-4" />
+              Try Speech Demo
+            </Button>
+          </Link>
         </div>
       </main>
       
