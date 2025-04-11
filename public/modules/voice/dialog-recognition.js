@@ -16,7 +16,6 @@ function startVoiceRecognitionForDialog(inputField) {
   
   // If there's already an active recognition, stop it first
   if (window.currentDialogRecognition) {
-    // console.log('Stopping previous recognition session');
     window.currentDialogRecognition.stop();
     window.currentDialogRecognition = null;
   }
@@ -81,19 +80,12 @@ function startVoiceRecognitionForDialog(inputField) {
     // Current transcript
     let currentTranscript = '';
     
-    // Event handlers
-    recognition.onstart = () => {
-      // console.log('Recognition started');
-    };
-    
+    // Ensure the event listener is added only once
     recognition.onresult = (event) => {
-      // console.log('Recognition result received', event);
       currentTranscript = '';
       for (let i = 0; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
       }
-      
-      // console.log('Current transcript:', currentTranscript);
       
       // Update the input field with the transcript
       if (inputField && inputField.tagName) {
