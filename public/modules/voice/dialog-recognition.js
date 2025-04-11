@@ -121,6 +121,13 @@ function startVoiceRecognitionForDialog(inputField) {
     // Function to clean up
     function cleanup() {
       // console.log('Cleaning up recognition resources');
+      if (window.currentDialogRecognition) {
+        window.currentDialogRecognition.onresult = null;
+        window.currentDialogRecognition.onerror = null;
+        window.currentDialogRecognition.onend = null;
+        window.currentDialogRecognition = null;
+      }
+
       if (recordingIndicator && recordingIndicator.parentNode) {
         recordingIndicator.parentNode.removeChild(recordingIndicator);
       }
@@ -128,14 +135,6 @@ function startVoiceRecognitionForDialog(inputField) {
       if (inputField) {
         inputField.removeAttribute('data-speech-target');
       }
-      
-      // Clear the global recognition instance
-      window.currentDialogRecognition = null;
-
-      // Remove event listeners to prevent duplication
-      recognition.onresult = null;
-      recognition.onerror = null;
-      recognition.onend = null;
     }
     
     // Stop button handler
