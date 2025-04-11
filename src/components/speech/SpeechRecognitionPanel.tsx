@@ -31,7 +31,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [textAreaContent, setTextAreaContent] = useState('');
-  const [insertedText, setInsertedText] = useState('');
+  const [previousTranscript, setPreviousTranscript] = useState('');
   const { toast } = useToast();
 
   // Save cursor position when text area is focused or clicked
@@ -52,8 +52,8 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
         textareaRef.current.focus();
         setCursorPosition(textareaRef.current.selectionStart);
       }
-      // Clear inserted text tracking for new recording session
-      setInsertedText('');
+      // Reset previous transcript for new recording session
+      setPreviousTranscript('');
       onStartListening();
       addDebugInfo(`Recording started with language: ${language}`);
     }
@@ -103,41 +103,38 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
 
   // Update textarea with transcript
   useEffect(() => {
-    if (isListening && transcript && transcript.trim() !== '') {
-      // Only process if we have new transcribed text to insert
-      if (transcript !== insertedText) {
-        // Get current text and cursor position
-        const currentText = textAreaContent;
-        const insertPosition = cursorPosition !== null ? cursorPosition : currentText.length;
-        
-        // Insert the new text at cursor position
-        const newText = 
-          currentText.substring(0, insertPosition) + 
-          transcript + 
-          currentText.substring(insertPosition);
-        
-        // Update the text area content
-        setTextAreaContent(newText);
-        
-        // Move cursor to end of inserted text
-        const newPosition = insertPosition + transcript.length;
-        
-        // Set cursor position after component updates
-        setTimeout(() => {
-          if (textareaRef.current) {
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(newPosition, newPosition);
-            setCursorPosition(newPosition);
-          }
-        }, 0);
-        
-        // Save what we've inserted to avoid duplication
-        setInsertedText(transcript);
-        
-        addDebugInfo(`New text "${transcript}" appended at position ${insertPosition}`);
-      }
+    if (isListening && transcript && transcript !== previousTranscript) {
+      // Get current text and cursor position
+      const currentText = textAreaContent;
+      const insertPosition = cursorPosition !== null ? cursorPosition : currentText.length;
+      
+      // Only insert the new part of the transcript
+      const newText = 
+        currentText.substring(0, insertPosition) + 
+        transcript + 
+        currentText.substring(insertPosition);
+      
+      // Update the text area content
+      setTextAreaContent(newText);
+      
+      // Move cursor to end of inserted text
+      const newPosition = insertPosition + transcript.length;
+      
+      // Set cursor position after component updates
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newPosition, newPosition);
+          setCursorPosition(newPosition);
+        }
+      }, 0);
+      
+      // Save what we've inserted to avoid duplication
+      setPreviousTranscript(transcript);
+      
+      addDebugInfo(`New text "${transcript}" appended at position ${insertPosition}`);
     }
-  }, [transcript, isListening, textAreaContent, cursorPosition, insertedText, addDebugInfo]);
+  }, [transcript, isListening, textAreaContent, cursorPosition, previousTranscript, addDebugInfo]);
 
   return (
     <Card className="w-full">
@@ -186,7 +183,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
             onClick={() => {
               onClear();
               setTextAreaContent('');
-              setInsertedText('');
+              setPreviousTranscript('');
             }} 
             variant="outline"
           >

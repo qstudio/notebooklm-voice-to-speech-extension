@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 
 interface SpeechRecognitionHook {
@@ -76,60 +77,6 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       recognitionInstance.interimResults = true;
       recognitionInstance.lang = 'en-US';
       
-      // Set up event handlers
-      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-        // Reset current transcript to avoid duplication
-        let currentTranscript = '';
-        
-        // Only get the latest result from the current recognition session
-        const resultIndex = event.resultIndex;
-        for (let i = resultIndex; i < event.results.length; i++) {
-          // Take the first alternative from each result
-          currentTranscript += event.results[i][0].transcript;
-        }
-        
-        setTranscript(currentTranscript);
-      };
-      
-      recognitionInstance.onerror = (event: SpeechRecognitionError) => {
-        console.error('Speech recognition error:', event.error);
-        let errorMessage = 'Unknown speech recognition error';
-        
-        switch(event.error) {
-          case 'no-speech':
-            errorMessage = 'No speech was detected. Please try again.';
-            break;
-          case 'aborted':
-            errorMessage = 'Speech recognition was aborted.';
-            break;
-          case 'audio-capture':
-            errorMessage = 'No microphone was found or microphone is not working.';
-            break;
-          case 'network':
-            errorMessage = 'Network error occurred. Please check your connection.';
-            break;
-          case 'not-allowed':
-            errorMessage = 'Microphone permission was denied. Please allow microphone access.';
-            break;
-          case 'service-not-allowed':
-            errorMessage = 'The speech recognition service is not allowed.';
-            break;
-          case 'bad-grammar':
-            errorMessage = 'There was an error with the speech grammar.';
-            break;
-          case 'language-not-supported':
-            errorMessage = 'The language is not supported.';
-            break;
-        }
-        
-        setError(errorMessage);
-        setIsListening(false);
-      };
-      
-      recognitionInstance.onend = () => {
-        setIsListening(false);
-      };
-      
       setRecognition(recognitionInstance);
     }
   }, []);
@@ -147,6 +94,67 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         if (language) {
           recognition.lang = language;
         }
+        
+        // Set up event handlers just before starting
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+          // Get the latest result
+          const results = event.results;
+          let finalTranscript = '';
+          
+          // Only process the current session's results
+          for (let i = event.resultIndex; i < results.length; i++) {
+            const result = results[i];
+            const transcript = result[0].transcript;
+            
+            if (result.isFinal) {
+              finalTranscript += transcript;
+            } else {
+              // For non-final results, just use the latest one
+              finalTranscript = transcript;
+            }
+          }
+          
+          setTranscript(finalTranscript);
+        };
+        
+        recognition.onerror = (event: SpeechRecognitionError) => {
+          console.error('Speech recognition error:', event.error);
+          let errorMessage = 'Unknown speech recognition error';
+          
+          switch(event.error) {
+            case 'no-speech':
+              errorMessage = 'No speech was detected. Please try again.';
+              break;
+            case 'aborted':
+              errorMessage = 'Speech recognition was aborted.';
+              break;
+            case 'audio-capture':
+              errorMessage = 'No microphone was found or microphone is not working.';
+              break;
+            case 'network':
+              errorMessage = 'Network error occurred. Please check your connection.';
+              break;
+            case 'not-allowed':
+              errorMessage = 'Microphone permission was denied. Please allow microphone access.';
+              break;
+            case 'service-not-allowed':
+              errorMessage = 'The speech recognition service is not allowed.';
+              break;
+            case 'bad-grammar':
+              errorMessage = 'There was an error with the speech grammar.';
+              break;
+            case 'language-not-supported':
+              errorMessage = 'The language is not supported.';
+              break;
+          }
+          
+          setError(errorMessage);
+          setIsListening(false);
+        };
+        
+        recognition.onend = () => {
+          setIsListening(false);
+        };
         
         recognition.start();
         setIsListening(true);
