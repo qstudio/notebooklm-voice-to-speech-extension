@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import SpeechDemo from "./pages/SpeechDemo";
 import NotFound from "./pages/NotFound";
 
+// Create a client for React Query
 const queryClient = new QueryClient();
 
 const App = () => (

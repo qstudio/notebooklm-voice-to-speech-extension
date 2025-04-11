@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import SettingsPanel from '@/components/SettingsPanel';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Mic, ArrowRight } from 'lucide-react';
+import { Mic, ArrowRight, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
@@ -24,18 +24,20 @@ const Index = () => {
       </header>
 
       <main className="max-w-2xl mx-auto w-full sm:w-[600px] md:w-[600px]">
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6 border border-gray-100">
-          <h2 className="text-lg font-medium mb-4">Speech Recognition Demo</h2>
-          <p className="text-sm text-muted-foreground mb-4">
+        <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-100 flex flex-col items-center">
+          <h2 className="text-lg font-medium mb-3 text-center">Try Speech Recognition Demo</h2>
+          <p className="text-sm text-muted-foreground mb-5 text-center max-w-md">
             Test the speech recognition functionality directly in your browser without installing the extension.
           </p>
-          <Link to="/demo" className="inline-block w-full">
-            <Button className="w-full gap-2 justify-center bg-blue-500 hover:bg-blue-600">
-              <Mic className="h-4 w-4" />
-              Open Speech Demo
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
-          </Link>
+          
+          <div className="flex gap-4 w-full max-w-md">
+            <Link to="/demo" className="w-full">
+              <Button variant="default" className="w-full gap-2 justify-center">
+                <Mic className="h-4 w-4" />
+                Open Demo
+              </Button>
+            </Link>
+          </div>
         </div>
         
         <SettingsPanel onSettingsChange={handleSettingsChange} />
