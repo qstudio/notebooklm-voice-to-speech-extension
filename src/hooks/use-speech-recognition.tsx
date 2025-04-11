@@ -86,7 +86,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         // Reset any previous errors
         setError(null);
         
-        // Clear transcript when starting new recognition
+        // Reset transcript when starting new recognition session
         setTranscript('');
         
         // Set language if provided
@@ -96,35 +96,22 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         
         // Set up event handlers just before starting
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-          // Get all results
-          const results = event.results;
-          let fullTranscript = '';
+          // Get latest result
+          let currentTranscript = '';
           
           // Process all results from the current session
-          for (let i = event.resultIndex; i < results.length; i++) {
-            const result = results[i];
-            const transcript = result[0].transcript;
-            
-            if (result.isFinal) {
-              fullTranscript += transcript + ' ';
-            } else {
-              // Include interim results as well
-              fullTranscript += transcript;
+          for (let i = 0; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal || i === event.results.length - 1) {
+              currentTranscript = result[0].transcript;
             }
           }
           
-          // Update the transcript state
-          setTranscript(prevTranscript => {
-            // For the first result, just return the new transcript
-            if (!prevTranscript) return fullTranscript.trim();
-            
-            // Otherwise append only if it's different (to avoid duplication)
-            // This is a simpler approach than before - we're replacing the entire transcript
-            return fullTranscript.trim();
-          });
+          // Update the transcript state with only the latest recognized speech
+          setTranscript(currentTranscript.trim());
           
           // Log for debugging
-          console.log("Speech recognition result:", fullTranscript);
+          console.log("Speech recognition result:", currentTranscript);
         };
         
         recognition.onerror = (event: SpeechRecognitionError) => {

@@ -30,6 +30,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [textAreaContent, setTextAreaContent] = useState('');
   const [previousTranscript, setPreviousTranscript] = useState('');
+  const [isInitialRecording, setIsInitialRecording] = useState(true);
 
   // Handle recording control
   const handleRecordingToggle = () => {
@@ -41,9 +42,10 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
       if (textareaRef.current) {
         textareaRef.current.focus();
         setCursorPosition(textareaRef.current.selectionStart);
+        setIsInitialRecording(textAreaContent.length === 0);
       }
       onStartListening();
-      addDebugInfo(`Recording started with language: ${language}`);
+      addDebugInfo(`Recording started with language: ${language} at cursor position: ${cursorPosition}`);
     }
   };
 
@@ -84,29 +86,45 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
     onClear();
     setTextAreaContent('');
     setPreviousTranscript('');
+    setIsInitialRecording(true);
   };
 
   // Update textarea with transcript directly from the hook
   useEffect(() => {
-    if (transcript) {
+    if (transcript && transcript !== previousTranscript) {
       // Only update if the transcript has changed from previous state
-      if (transcript !== previousTranscript) {
+      setPreviousTranscript(transcript);
+      addDebugInfo(`Transcript updated: "${transcript.substring(0, 30)}${transcript.length > 30 ? '...' : ''}"${isInitialRecording ? ' (initial)' : ' (append)'}`);
+      
+      // For initial recording or when cursor is null, replace the entire content
+      if (isInitialRecording || cursorPosition === null) {
         setTextAreaContent(transcript);
-        setPreviousTranscript(transcript);
-        addDebugInfo(`Transcript updated: "${transcript.substring(0, 30)}${transcript.length > 30 ? '...' : ''}"`);
+      } else {
+        // For subsequent recordings, insert at cursor position
+        const beforeCursor = textAreaContent.substring(0, cursorPosition);
+        const afterCursor = textAreaContent.substring(cursorPosition);
         
-        // Set cursor position to end of text
+        // Get only the new text (what was added since the last update)
+        const newTranscriptText = transcript;
+        
+        // Combine text: text before cursor + new transcript + text after cursor
+        const newContent = beforeCursor + newTranscriptText + afterCursor;
+        setTextAreaContent(newContent);
+        
+        // Calculate new cursor position (after the newly inserted text)
+        const newPosition = beforeCursor.length + newTranscriptText.length;
+        
+        // Set cursor position to end of inserted text
         setTimeout(() => {
           if (textareaRef.current) {
             textareaRef.current.focus();
-            const newPosition = transcript.length;
             textareaRef.current.setSelectionRange(newPosition, newPosition);
             setCursorPosition(newPosition);
           }
         }, 0);
       }
     }
-  }, [transcript, previousTranscript, addDebugInfo]);
+  }, [transcript, previousTranscript, cursorPosition, textAreaContent, isInitialRecording, addDebugInfo]);
 
   return (
     <Card className="w-full">
