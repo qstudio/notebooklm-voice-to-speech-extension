@@ -99,22 +99,18 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         recognition.onresult = (event: SpeechRecognitionEvent) => {
           // Get the latest result
           const results = event.results;
-          let finalTranscript = '';
+          let currentTranscript = '';
           
-          // Only process the current session's results
-          for (let i = event.resultIndex; i < results.length; i++) {
+          // Process all results from the current session
+          for (let i = 0; i < results.length; i++) {
             const result = results[i];
-            const transcript = result[0].transcript;
-            
             if (result.isFinal) {
-              finalTranscript += transcript;
-            } else {
-              // For non-final results, just use the latest one
-              finalTranscript = transcript;
+              currentTranscript += result[0].transcript + ' ';
             }
           }
           
-          setTranscript(finalTranscript);
+          // Trim any extra spaces and set the transcript
+          setTranscript(currentTranscript.trim());
         };
         
         recognition.onerror = (event: SpeechRecognitionError) => {

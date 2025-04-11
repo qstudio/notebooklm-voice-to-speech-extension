@@ -29,7 +29,8 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [textAreaContent, setTextAreaContent] = useState('');
-  const [previousTranscript, setPreviousTranscript] = useState('');
+  // Track the last transcript to prevent duplications
+  const [lastProcessedTranscript, setLastProcessedTranscript] = useState('');
 
   // Save cursor position when text area is focused or clicked
   const updateCursorPosition = () => {
@@ -49,8 +50,8 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
         textareaRef.current.focus();
         setCursorPosition(textareaRef.current.selectionStart);
       }
-      // Reset previous transcript for new recording session
-      setPreviousTranscript('');
+      // Reset transcript tracking for new recording session
+      setLastProcessedTranscript('');
       onStartListening();
       addDebugInfo(`Recording started with language: ${language}`);
     }
@@ -85,27 +86,47 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const handleClear = () => {
     onClear();
     setTextAreaContent('');
-    setPreviousTranscript('');
+    setLastProcessedTranscript('');
   };
 
-  // Update textarea with transcript
+  // Update textarea with transcript (fixed to prevent duplicate text)
   useEffect(() => {
-    if (isListening && transcript && transcript !== previousTranscript) {
+    if (isListening && transcript && transcript !== lastProcessedTranscript) {
       // Get current text and cursor position
       const currentText = textAreaContent;
       const insertPosition = cursorPosition !== null ? cursorPosition : currentText.length;
       
-      // Only insert the new part of the transcript
-      const newText = 
-        currentText.substring(0, insertPosition) + 
-        transcript + 
-        currentText.substring(insertPosition);
-      
-      // Update the text area content
-      setTextAreaContent(newText);
+      // Only add the new part of the transcript to avoid duplication
+      // If the transcript is completely new (different from last one)
+      if (!transcript.startsWith(lastProcessedTranscript)) {
+        // Completely new transcript - replace at cursor position
+        const newText = 
+          currentText.substring(0, insertPosition) + 
+          transcript + 
+          currentText.substring(insertPosition);
+        
+        setTextAreaContent(newText);
+        
+        // Log the change for debugging
+        addDebugInfo(`New text "${transcript}" appended at position ${insertPosition}`);
+      } else if (transcript.length > lastProcessedTranscript.length) {
+        // Only append the new part of the transcript
+        const newPart = transcript.substring(lastProcessedTranscript.length);
+        
+        const newText = 
+          currentText.substring(0, insertPosition) + 
+          newPart + 
+          currentText.substring(insertPosition);
+        
+        setTextAreaContent(newText);
+        
+        // Log the change for debugging
+        addDebugInfo(`New text "${newPart}" appended at position ${insertPosition}`);
+      }
       
       // Move cursor to end of inserted text
-      const newPosition = insertPosition + transcript.length;
+      const newPosition = insertPosition + 
+        (transcript.length - (lastProcessedTranscript ? lastProcessedTranscript.length : 0));
       
       // Set cursor position after component updates
       setTimeout(() => {
@@ -116,12 +137,10 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
         }
       }, 0);
       
-      // Save what we've inserted to avoid duplication
-      setPreviousTranscript(transcript);
-      
-      addDebugInfo(`New text "${transcript}" appended at position ${insertPosition}`);
+      // Update the last processed transcript
+      setLastProcessedTranscript(transcript);
     }
-  }, [transcript, isListening, textAreaContent, cursorPosition, previousTranscript, addDebugInfo]);
+  }, [transcript, isListening, textAreaContent, cursorPosition, lastProcessedTranscript, addDebugInfo]);
 
   return (
     <Card className="w-full">
