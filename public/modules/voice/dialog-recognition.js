@@ -139,6 +139,11 @@ function startVoiceRecognitionForDialog(inputField) {
       
       // Clear the global recognition instance
       window.currentDialogRecognition = null;
+
+      // Remove event listeners to prevent duplication
+      recognition.onresult = null;
+      recognition.onerror = null;
+      recognition.onend = null;
     }
     
     // Stop button handler
