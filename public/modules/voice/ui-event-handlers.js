@@ -31,7 +31,7 @@ function setupUIEventHandlers(recognition, recorderUI) {
         if (typeof addTextToNotebook === 'function') {
           addTextToNotebook(text);
         } else {
-          console.error('addTextToNotebook function not available');
+          // console.error('addTextToNotebook function not available');
           alert('Could not add text to notebook. The function is not available.');
         }
       }

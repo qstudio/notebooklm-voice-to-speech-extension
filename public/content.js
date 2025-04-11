@@ -1,6 +1,5 @@
-// Voice to Text for Google NotebookLM - Content Script
 
-// console.log('Voice to Text for Google NotebookLM content script loaded');
+// Voice to Text for Google NotebookLM - Content Script
 
 // Add some basic styles
 const style = document.createElement('style');
@@ -66,18 +65,16 @@ document.head.appendChild(style);
 // Inject script with better error handling
 function injectScript(file) {
   return new Promise((resolve, reject) => {
-    // console.log('Injecting script:', file);
     const script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('src', chrome.runtime.getURL(file));
     
     script.onload = function() {
-      // console.log(`Script ${file} loaded successfully`);
       resolve(file);
     };
     
     script.onerror = function(error) {
-      console.log(`Error loading script ${file}:`, error);
+      // console.log(`Error loading script ${file}:`, error);
       reject(error);
     };
     
@@ -91,18 +88,15 @@ window.addEventListener('message', function(event) {
   if (event.source !== window) return;
   
   if (event.data.type && event.data.type === 'FROM_PAGE_SCRIPT') {
-    // console.log('Content script received message from page script:', event.data);
-    
     // Handle any requests from the injected script
     if (event.data.action === 'logMessage') {
-      // console.log('From injected script:', event.data.message);
+      // Do nothing (removed console.log)
     }
     
     // Relay messages to background script if needed
     if (event.data.action === 'relayToBackground') {
       chrome.runtime.sendMessage(event.data.message)
         .then(response => {
-          // console.log('Background response:', response);
           // Relay back to page script if needed
           window.postMessage({
             type: 'FROM_CONTENT_SCRIPT',
@@ -111,7 +105,7 @@ window.addEventListener('message', function(event) {
           }, '*');
         })
         .catch(error => {
-          console.log('Error sending message to background:', error);
+          // console.log('Error sending message to background:', error);
         });
     }
   }
@@ -141,18 +135,15 @@ async function injectAllScripts() {
     // Finally inject the main module script
     await injectScript('modules/core.js');
     
-    // console.log('All scripts injected successfully');
-    
     // Ensure initialization is triggered after scripts are loaded
     setTimeout(() => {
-      // console.log('Initializing Voice to Text...');
       window.postMessage({ 
         type: 'FROM_CONTENT_SCRIPT', 
         action: 'initialize' 
       }, '*');
     }, 2500); // Increased timeout to ensure all scripts are fully processed
   } catch (error) {
-    console.log('Error injecting scripts:', error);
+    // console.log('Error injecting scripts:', error);
   }
 }
 
@@ -166,7 +157,6 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "checkContentScript") {
-    // console.log('Received checkContentScript message, responding with active status');
     sendResponse({ status: "active" });
   }
   return true;
