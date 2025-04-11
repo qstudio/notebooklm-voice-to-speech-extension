@@ -11,14 +11,10 @@ import NotFound from "./pages/NotFound";
 // Create a client for React Query
 const queryClient = new QueryClient();
 
-// Debug flag for routing issues
-const DEBUG = true;
+// Debug flag disabled
+const DEBUG = false;
 
 const App = () => {
-  if (DEBUG) {
-    console.log('App rendering, current path:', window.location.hash || 'No hash present');
-  }
-  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
