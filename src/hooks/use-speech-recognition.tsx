@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 
 interface SpeechRecognitionHook {
@@ -96,22 +97,14 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         
         // Set up event handlers just before starting
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-          // Get latest result
-          let currentTranscript = '';
-          
-          // Process all results from the current session
-          for (let i = 0; i < event.results.length; i++) {
-            const result = event.results[i];
-            if (result.isFinal || i === event.results.length - 1) {
-              currentTranscript = result[0].transcript;
+          // Get current transcript from latest result
+          if (event.results.length > 0) {
+            const current = event.results[event.results.length - 1];
+            if (current.isFinal || true) { // Always use the latest result
+              const currentText = current[0].transcript.trim();
+              setTranscript(currentText);
             }
           }
-          
-          // Update the transcript state with only the latest recognized speech
-          setTranscript(currentTranscript.trim());
-          
-          // Log for debugging
-          console.log("Speech recognition result:", currentTranscript);
         };
         
         recognition.onerror = (event: SpeechRecognitionError) => {

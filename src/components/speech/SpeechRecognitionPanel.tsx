@@ -31,6 +31,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const [textAreaContent, setTextAreaContent] = useState('');
   const [previousTranscript, setPreviousTranscript] = useState('');
   const [isInitialRecording, setIsInitialRecording] = useState(true);
+  const [lastTranscriptLength, setLastTranscriptLength] = useState(0);
 
   // Handle recording control
   const handleRecordingToggle = () => {
@@ -43,6 +44,8 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
         textareaRef.current.focus();
         setCursorPosition(textareaRef.current.selectionStart);
         setIsInitialRecording(textAreaContent.length === 0);
+        setLastTranscriptLength(0); // Reset last transcript length when starting new recording
+        setPreviousTranscript(''); // Reset previous transcript
       }
       onStartListening();
       addDebugInfo(`Recording started with language: ${language} at cursor position: ${cursorPosition}`);
@@ -87,6 +90,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
     setTextAreaContent('');
     setPreviousTranscript('');
     setIsInitialRecording(true);
+    setLastTranscriptLength(0);
   };
 
   // Update textarea with transcript directly from the hook
@@ -94,17 +98,17 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
     if (transcript && transcript !== previousTranscript) {
       // Only update if the transcript has changed from previous state
       setPreviousTranscript(transcript);
-      addDebugInfo(`Transcript updated: "${transcript.substring(0, 30)}${transcript.length > 30 ? '...' : ''}"${isInitialRecording ? ' (initial)' : ' (append)'}`);
       
-      // For initial recording or when cursor is null, replace the entire content
-      if (isInitialRecording || cursorPosition === null) {
+      // For initial recording or when no text exists, replace the entire content
+      if (isInitialRecording || textAreaContent.length === 0) {
         setTextAreaContent(transcript);
-      } else {
+        addDebugInfo(`Transcript updated: "${transcript.substring(0, 30)}${transcript.length > 30 ? '...' : ''}" (initial)`);
+      } else if (cursorPosition !== null) {
         // For subsequent recordings, insert at cursor position
         const beforeCursor = textAreaContent.substring(0, cursorPosition);
         const afterCursor = textAreaContent.substring(cursorPosition);
         
-        // Get only the new text (what was added since the last update)
+        // Get only the new text added since last update
         const newTranscriptText = transcript;
         
         // Combine text: text before cursor + new transcript + text after cursor
@@ -112,7 +116,9 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
         setTextAreaContent(newContent);
         
         // Calculate new cursor position (after the newly inserted text)
-        const newPosition = beforeCursor.length + newTranscriptText.length;
+        const newPosition = cursorPosition + newTranscriptText.length;
+        
+        addDebugInfo(`Transcript updated: "${transcript.substring(0, 30)}${transcript.length > 30 ? '...' : ''}" (append)`);
         
         // Set cursor position to end of inserted text
         setTimeout(() => {
@@ -123,6 +129,9 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
           }
         }, 0);
       }
+      
+      // Update the last transcript length for next comparison
+      setLastTranscriptLength(transcript.length);
     }
   }, [transcript, previousTranscript, cursorPosition, textAreaContent, isInitialRecording, addDebugInfo]);
 

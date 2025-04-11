@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 
 interface TranscriptionTextareaProps {
@@ -27,8 +27,9 @@ const TranscriptionTextarea: React.FC<TranscriptionTextareaProps> = ({
         onChange={onChange}
         onKeyDown={onInteraction}
         onMouseDown={onInteraction}
+        onMouseUp={onSelectionChange} // Added to capture mouse selection changes
         onPaste={onInteraction}
-        onClick={onInteraction}
+        onClick={onSelectionChange} // Changed to update cursor position on click
         onSelect={onSelectionChange}
       />
     </div>
