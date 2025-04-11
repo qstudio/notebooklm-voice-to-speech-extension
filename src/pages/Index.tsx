@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SettingsPanel from '@/components/SettingsPanel';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,14 @@ import { Link } from 'react-router-dom';
 const Index = () => {
   const [language, setLanguage] = useState('en-US');
   const { toast } = useToast();
+  const [currentPath, setCurrentPath] = useState('');
+
+  // Debug - log component mount and current path
+  useEffect(() => {
+    const path = window.location.hash || 'No hash';
+    console.log('Index component mounted, current hash:', path);
+    setCurrentPath(path);
+  }, []);
 
   const handleSettingsChange = (settings: any) => {
     if (settings.language) {
@@ -24,6 +32,11 @@ const Index = () => {
       </header>
 
       <main className="max-w-2xl mx-auto w-full sm:w-[600px] md:w-[600px]">
+        {/* Debug info - remove in production */}
+        <div className="bg-amber-50 p-2 mb-4 text-xs text-amber-800 rounded border border-amber-200">
+          Current path: {currentPath}
+        </div>
+        
         <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-100 flex flex-col items-center">
           <h2 className="text-lg font-medium mb-3 text-center">Try Speech Recognition Demo</h2>
           <p className="text-sm text-muted-foreground mb-5 text-center max-w-md">
@@ -32,11 +45,16 @@ const Index = () => {
           
           <div className="flex gap-4 w-full max-w-md">
             <Link to="/demo" className="w-full">
-              <Button variant="default" className="w-full gap-2 justify-center">
-                <Mic className="h-4 w-4" />
+              <Button variant="default" size="lg" className="w-full gap-2 justify-center bg-green-500 hover:bg-green-600">
+                <Mic className="h-5 w-5" />
                 Open Demo
               </Button>
             </Link>
+          </div>
+          
+          {/* Direct hash link as fallback */}
+          <div className="mt-4 text-sm">
+            <p>If the button doesn't work, try <a href="#/demo" className="text-blue-500 underline">this direct link</a></p>
           </div>
         </div>
         
