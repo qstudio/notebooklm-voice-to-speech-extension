@@ -79,9 +79,13 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       // Set up event handlers
       recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
         let currentTranscript = '';
+        
+        // Collect only the final results to avoid duplicates
         for (let i = 0; i < event.results.length; i++) {
+          // Take the first alternative from each result
           currentTranscript += event.results[i][0].transcript;
         }
+        
         setTranscript(currentTranscript);
       };
       

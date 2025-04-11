@@ -31,6 +31,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [textAreaContent, setTextAreaContent] = useState('');
+  const [lastTranscriptLength, setLastTranscriptLength] = useState(0);
   const { toast } = useToast();
 
   // Handle recording control
@@ -100,37 +101,21 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
     }
   };
 
-  // Update textarea with transcript and maintain cursor position
+  // Update textarea with transcript
   useEffect(() => {
-    if (isListening && transcript && textareaRef.current) {
-      // Get current text and cursor position
-      const currentText = textAreaContent;
-      const currentPosition = cursorPosition ?? currentText.length;
-      
-      // Insert transcript at cursor position
-      const newText = 
-        currentText.substring(0, currentPosition) + 
-        transcript + 
-        currentText.substring(currentPosition);
-      
-      // Update textarea value
-      setTextAreaContent(newText);
-      
-      // Move cursor to the end of the inserted text
-      const newPosition = currentPosition + transcript.length;
-      
-      // This will be done after the component updates
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-          textareaRef.current.setSelectionRange(newPosition, newPosition);
-          setCursorPosition(newPosition);
-        }
-      }, 0);
-      
-      addDebugInfo(`Transcript updated and inserted at position ${currentPosition}`);
+    if (isListening && transcript) {
+      // Only proceed if we have new transcript text (compared to last update)
+      if (transcript.length !== lastTranscriptLength) {
+        setLastTranscriptLength(transcript.length);
+        
+        // Use the complete transcript as the text area content
+        setTextAreaContent(transcript);
+        
+        // Log the update (but only when the length changes to avoid spam)
+        addDebugInfo(`New transcript received: "${transcript.slice(-20)}..."`);
+      }
     }
-  }, [transcript, isListening, cursorPosition, addDebugInfo]);
+  }, [transcript, isListening, addDebugInfo, lastTranscriptLength]);
 
   return (
     <Card className="w-full">
@@ -179,6 +164,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
             onClick={() => {
               onClear();
               setTextAreaContent('');
+              setLastTranscriptLength(0);
             }} 
             variant="outline"
           >
