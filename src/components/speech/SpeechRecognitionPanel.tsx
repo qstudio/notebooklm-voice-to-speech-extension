@@ -29,6 +29,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [textAreaContent, setTextAreaContent] = useState('');
+  const [previousTranscript, setPreviousTranscript] = useState('');
 
   // Handle recording control
   const handleRecordingToggle = () => {
@@ -82,25 +83,30 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const handleClear = () => {
     onClear();
     setTextAreaContent('');
+    setPreviousTranscript('');
   };
 
   // Update textarea with transcript directly from the hook
   useEffect(() => {
     if (transcript) {
-      setTextAreaContent(transcript);
-      addDebugInfo(`Transcript updated: "${transcript.substring(0, 30)}${transcript.length > 30 ? '...' : ''}"`);
-      
-      // Set cursor position to end of text
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-          const newPosition = transcript.length;
-          textareaRef.current.setSelectionRange(newPosition, newPosition);
-          setCursorPosition(newPosition);
-        }
-      }, 0);
+      // Only update if the transcript has changed from previous state
+      if (transcript !== previousTranscript) {
+        setTextAreaContent(transcript);
+        setPreviousTranscript(transcript);
+        addDebugInfo(`Transcript updated: "${transcript.substring(0, 30)}${transcript.length > 30 ? '...' : ''}"`);
+        
+        // Set cursor position to end of text
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.focus();
+            const newPosition = transcript.length;
+            textareaRef.current.setSelectionRange(newPosition, newPosition);
+            setCursorPosition(newPosition);
+          }
+        }, 0);
+      }
     }
-  }, [transcript, addDebugInfo]);
+  }, [transcript, previousTranscript, addDebugInfo]);
 
   return (
     <Card className="w-full">
