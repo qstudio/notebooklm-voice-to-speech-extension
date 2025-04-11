@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 
 interface SpeechRecognitionHook {
@@ -14,6 +13,7 @@ interface SpeechRecognitionHook {
 // Define the SpeechRecognition types
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
+  resultIndex: number;
 }
 
 interface SpeechRecognitionResultList {
