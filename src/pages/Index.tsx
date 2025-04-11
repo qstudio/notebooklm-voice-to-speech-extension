@@ -39,10 +39,6 @@ const Index = () => {
             </Link>
           </div>
           
-          {/* Direct hash link as fallback */}
-          <div className="mt-4 text-sm">
-            <p>If the button doesn't work, try <a href="#/demo" className="text-blue-500 underline">this direct link</a></p>
-          </div>
         </div>
         
         <SettingsPanel onSettingsChange={handleSettingsChange} />
