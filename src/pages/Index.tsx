@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import SettingsPanel from '@/components/SettingsPanel';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Mic, ArrowRight, MessageSquare } from 'lucide-react';
+import { Mic, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
-  const [language, setLanguage] = useState('en-US');
+  const [language, setLanguage] = useState(navigator.language || 'en-US');
   const { toast } = useToast();
   const [currentPath, setCurrentPath] = useState('');
 
