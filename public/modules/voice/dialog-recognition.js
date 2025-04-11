@@ -74,21 +74,35 @@ function startVoiceRecognitionForDialog(inputField) {
     
     // Configure recognition
     recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US'; // Default to English
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
     
-    // Current transcript
+    // Temporary variable to store the transcript
     let currentTranscript = '';
-    
-    // Ensure the event listener is added only once
+
+    // Handle recognition results
     recognition.onresult = (event) => {
       currentTranscript = '';
       for (let i = 0; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
       }
-      
-      // Update the input field with the transcript
-      if (inputField && inputField.tagName) {
+      writeToInputField();
+    };
+
+    // Handle recognition errors
+    recognition.onerror = (event) => {
+      alert(`Speech recognition error: ${event.error}`);
+      cleanup();
+    };
+
+    // Handle recognition end
+    recognition.onend = () => {
+      cleanup();
+    };
+
+    // Function to write the transcript to the input field
+    function writeToInputField() {
+      if (currentTranscript && inputField && inputField.tagName) {
         if (inputField.tagName === 'TEXTAREA' || inputField.tagName === 'INPUT') {
           inputField.value = currentTranscript;
           inputField.dispatchEvent(new Event('input', { bubbles: true }));
@@ -99,28 +113,12 @@ function startVoiceRecognitionForDialog(inputField) {
           }
           inputField.appendChild(document.createTextNode(currentTranscript));
           inputField.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-          // console.warn('Input field is neither input/textarea nor contenteditable:', inputField);
         }
-      } else {
-        // console.error('Input field is not valid:', inputField);
       }
-    };
-    
-    recognition.onerror = (event) => {
-      // console.error('Recognition error:', event.error);
-      alert(`Speech recognition error: ${event.error}`);
-      cleanup();
-    };
-    
-    recognition.onend = () => {
-      // console.log('Recognition ended');
-      cleanup();
-    };
-    
+    }
+
     // Function to clean up
     function cleanup() {
-      // console.log('Cleaning up recognition resources');
       if (window.currentDialogRecognition) {
         window.currentDialogRecognition.onresult = null;
         window.currentDialogRecognition.onerror = null;
@@ -131,18 +129,26 @@ function startVoiceRecognitionForDialog(inputField) {
       if (recordingIndicator && recordingIndicator.parentNode) {
         recordingIndicator.parentNode.removeChild(recordingIndicator);
       }
-      
+
       if (inputField) {
         inputField.removeAttribute('data-speech-target');
       }
     }
-    
+
     // Stop button handler
     stopButton.addEventListener('click', () => {
-      // console.log('Stop button clicked');
+      writeToInputField();
       recognition.stop();
     });
-    
+
+    // Add focus event listener to the input field
+    if (inputField) {
+      inputField.addEventListener('focus', () => {
+        writeToInputField();
+        recognition.stop();
+      });
+    }
+
     // Add event listeners to Insert and Cancel buttons
     setTimeout(() => {
       const dialog = document.querySelector('mat-dialog-container[role="dialog"]');
@@ -157,9 +163,8 @@ function startVoiceRecognitionForDialog(inputField) {
           // console.log('Found Insert button, adding stop recognition event');
           insertButton.addEventListener('click', function() {
             // console.log('Insert button clicked, stopping recognition');
-            if (window.currentDialogRecognition) {
-              window.currentDialogRecognition.stop();
-            }
+            writeToInputField();
+            recognition.stop();
           });
         }
         
@@ -173,34 +178,24 @@ function startVoiceRecognitionForDialog(inputField) {
           // console.log('Found Cancel button, adding stop recognition event');
           cancelButton.addEventListener('click', function() {
             // console.log('Cancel button clicked, stopping recognition');
-            if (window.currentDialogRecognition) {
-              window.currentDialogRecognition.stop();
-            }
+            recognition.stop();
           });
         }
       }
     }, 500);
     
-    // First request microphone permission explicitly
+    // Request microphone permission explicitly
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
-        // console.log('Microphone permission granted');
-        
-        // Close the stream immediately as we don't need it, just the permission
         stream.getTracks().forEach(track => track.stop());
-        
-        // Start recording after permission is granted
         recognition.start();
-        // console.log('Recognition started after permission granted');
       })
       .catch(err => {
-        // console.error('Microphone permission denied:', err);
         alert('You need to allow microphone access for voice recognition to work.');
         cleanup();
       });
     
   } catch (error) {
-    // console.error('Error initializing dialog voice recognition:', error);
     alert('Failed to start voice recognition: ' + error.message);
   }
 }

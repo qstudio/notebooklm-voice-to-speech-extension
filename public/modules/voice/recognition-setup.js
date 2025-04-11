@@ -1,4 +1,3 @@
-
 // Voice recognition setup for Google NotebookLM
 
 /**
@@ -13,7 +12,7 @@ function createSpeechRecognition(language = 'en-US') {
   
   // Configure basic properties
   recognition.continuous = true;
-  recognition.interimResults = true;
+  recognition.interimResults = false;
   recognition.lang = language;
   
   return recognition;
@@ -30,7 +29,9 @@ function setupRecognitionEvents(recognition, recorderUI) {
   recognition.onresult = (event) => {
     let transcript = '';
     for (let i = 0; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        transcript += event.results[i][0].transcript;
+      }
     }
     recorderUI.textarea.value = transcript;
   };

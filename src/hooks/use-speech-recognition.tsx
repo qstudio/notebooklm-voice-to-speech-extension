@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 
 interface SpeechRecognitionHook {
@@ -74,7 +73,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       
       // Configure recognition instance
       recognitionInstance.continuous = true;
-      recognitionInstance.interimResults = true;
+      recognitionInstance.interimResults = false;
       recognitionInstance.lang = 'en-US';
       
       setRecognition(recognitionInstance);
@@ -100,7 +99,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
           // Get current transcript from latest result
           if (event.results.length > 0) {
             const current = event.results[event.results.length - 1];
-            if (current.isFinal || true) { // Always use the latest result
+            if (current.isFinal) {
               const currentText = current[0].transcript.trim();
               setTranscript(currentText);
             }
