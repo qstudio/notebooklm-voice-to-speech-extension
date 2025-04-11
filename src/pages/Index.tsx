@@ -30,7 +30,7 @@ const Index = () => {
             Test the speech recognition functionality directly in your browser without installing the extension.
           </p>
           <Link to="/demo" className="inline-block w-full">
-            <Button className="w-full gap-2 justify-center">
+            <Button className="w-full gap-2 justify-center bg-blue-500 hover:bg-blue-600">
               <Mic className="h-4 w-4" />
               Open Speech Demo
               <ArrowRight className="h-4 w-4 ml-1" />
