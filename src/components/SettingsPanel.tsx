@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/components/ui/use-toast';
 import { Settings, RefreshCw } from 'lucide-react';
 import LanguageSelector from '@/components/settings/LanguageSelector';
-import FeatureToggles from '@/components/settings/FeatureToggles';
 
 interface SettingsPanelProps {
   onSettingsChange?: (settings: any) => void;
@@ -13,14 +12,10 @@ interface SettingsPanelProps {
 
 interface SettingsState {
   language: string;
-  autoInsert: boolean;
-  confirmBeforeAdd: boolean;
 }
 
 const defaultSettings: SettingsState = {
-  language: 'en-US',
-  autoInsert: false,
-  confirmBeforeAdd: true
+  language: navigator.language || 'en-US'
 };
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
@@ -29,19 +24,23 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load settings from Chrome storage
+    // Load settings from Chrome storage or use browser's language
     if (typeof window !== 'undefined' && 'chrome' in window && window.chrome.runtime) {
       window.chrome.runtime.sendMessage(
         { action: 'getSettings' },
         (response) => {
           if (response && response.status === 'success') {
             setSettings(response.settings);
+          } else {
+            // If no settings found, use browser's language
+            setSettings({ language: navigator.language || 'en-US' });
           }
           setIsLoading(false);
         }
       );
     } else {
-      // Not running in a Chrome extension context
+      // Not running in a Chrome extension context, use browser's language
+      setSettings({ language: navigator.language || 'en-US' });
       setIsLoading(false);
     }
   }, []);
@@ -71,20 +70,21 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
   };
 
   const resetSettings = () => {
-    setSettings(defaultSettings);
+    const newSettings = { language: navigator.language || 'en-US' };
+    setSettings(newSettings);
     
     if (typeof window !== 'undefined' && 'chrome' in window && window.chrome.runtime) {
       window.chrome.runtime.sendMessage(
-        { action: 'saveSettings', settings: defaultSettings },
+        { action: 'saveSettings', settings: newSettings },
         (response) => {
           if (response && response.status === 'saved') {
             toast({
               title: "Settings Reset",
-              description: "All settings have been reset to default values."
+              description: "Language has been reset to browser default."
             });
             
             if (onSettingsChange) {
-              onSettingsChange(defaultSettings);
+              onSettingsChange(newSettings);
             }
           }
         }
@@ -92,11 +92,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
     } else {
       toast({
         title: "Settings Reset",
-        description: "All settings have been reset to default values."
+        description: "Language has been reset to browser default."
       });
       
       if (onSettingsChange) {
-        onSettingsChange(defaultSettings);
+        onSettingsChange(newSettings);
       }
     }
   };
@@ -120,20 +120,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
           <Settings className="h-5 w-5" /> Extension Settings
         </CardTitle>
         <CardDescription>
-          Configure how Speech to Text works with Google NotebookLM
+          Configure the language for speech recognition
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent>
         <LanguageSelector 
           value={settings.language} 
           onChange={(value) => handleSettingChange('language', value)}
-        />
-
-        <FeatureToggles 
-          autoInsert={settings.autoInsert}
-          confirmBeforeAdd={settings.confirmBeforeAdd}
-          onAutoInsertChange={(checked) => handleSettingChange('autoInsert', checked)}
-          onConfirmBeforeAddChange={(checked) => handleSettingChange('confirmBeforeAdd', checked)}
         />
       </CardContent>
       <CardFooter className="justify-between border-t pt-4">
@@ -142,7 +135,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onSettingsChange }) => {
           size="sm"
           onClick={resetSettings}
         >
-          Reset to Defaults
+          Reset to Browser Default
         </Button>
       </CardFooter>
     </Card>

@@ -1,33 +1,32 @@
+
 // Voice to Text for Google NotebookLM - Background Script
 
 // Set up initial state
 chrome.runtime.onInstalled.addListener(() => {
-  // console.log('Voice to Text for Google NotebookLM extension installed');
+  // Get browser's language or use default
+  const browserLanguage = navigator.language || 'en-US';
   
   // Set default options
   chrome.storage.local.set({
     voiceSettings: {
-      language: 'en-US',
-      autoInsert: false,
-      confirmBeforeAdd: true
+      language: browserLanguage
     }
   });
 });
 
 // Listen for messages from popup or content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  // console.log('Background script received message:', request);
-  
   // Handle getting settings
   if (request.action === "getSettings") {
     chrome.storage.local.get(['voiceSettings'], (result) => {
+      // If no settings found, use browser's language
+      const settings = result.voiceSettings || {
+        language: navigator.language || 'en-US'
+      };
+      
       sendResponse({ 
         status: "success", 
-        settings: result.voiceSettings || {
-          language: 'en-US',
-          autoInsert: false,
-          confirmBeforeAdd: true
-        }
+        settings: settings
       });
     });
     return true; // Keep the message channel open for async response
@@ -41,5 +40,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // Keep the message channel open for async response
   }
 });
-
-// console.log('Voice to Text for Google NotebookLM background script loaded');

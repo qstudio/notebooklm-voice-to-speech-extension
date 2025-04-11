@@ -23,6 +23,18 @@ function setupUIEventHandlers(recognition, recorderUI) {
           recorderUI.recordingIndicator.style.display = 'none';
         }
       }
+      
+      // Automatically add text when recording stops
+      const text = recorderUI.textarea.value.trim();
+      if (text) {
+        // Try to add the text to the notebook
+        if (typeof addTextToNotebook === 'function') {
+          addTextToNotebook(text);
+        } else {
+          console.error('addTextToNotebook function not available');
+          alert('Could not add text to notebook. The function is not available.');
+        }
+      }
     } else {
       recognition.start();
       
@@ -36,21 +48,6 @@ function setupUIEventHandlers(recognition, recorderUI) {
           recorderUI.recordingIndicator.style.display = 'inline-block';
         }
       }
-    }
-  };
-  
-  // Set up add button
-  recorderUI.addButton.onclick = () => {
-    const text = recorderUI.textarea.value.trim();
-    if (text) {
-      // Try to add the text to the notebook
-      if (typeof addTextToNotebook === 'function') {
-        addTextToNotebook(text);
-      } else {
-        console.error('addTextToNotebook function not available');
-        alert('Could not add text to notebook. The function is not available.');
-      }
-      recorderUI.element.remove();
     }
   };
   
