@@ -31,7 +31,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [textAreaContent, setTextAreaContent] = useState('');
-  const [lastTranscriptLength, setLastTranscriptLength] = useState(0);
+  const [previousTranscript, setPreviousTranscript] = useState('');
   const { toast } = useToast();
 
   // Handle recording control
@@ -45,6 +45,8 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
         textareaRef.current.focus();
         setCursorPosition(textareaRef.current.selectionStart);
       }
+      // Remember the current transcript before starting a new recording
+      setPreviousTranscript(transcript);
       onStartListening();
       addDebugInfo(`Recording started with language: ${language}`);
     }
@@ -104,18 +106,42 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
   // Update textarea with transcript
   useEffect(() => {
     if (isListening && transcript) {
-      // Only proceed if we have new transcript text (compared to last update)
-      if (transcript.length !== lastTranscriptLength) {
-        setLastTranscriptLength(transcript.length);
+      // Only append new speech if there's something new compared to the previous transcript
+      if (transcript !== previousTranscript) {
+        // Get the new text that was added since we started recording
+        const newTextToAppend = transcript.replace(previousTranscript, '').trim();
         
-        // Use the complete transcript as the text area content
-        setTextAreaContent(transcript);
-        
-        // Log the update (but only when the length changes to avoid spam)
-        addDebugInfo(`New transcript received: "${transcript.slice(-20)}..."`);
+        if (newTextToAppend) {
+          // Get current text and cursor position
+          const currentText = textAreaContent;
+          const insertPosition = cursorPosition ?? currentText.length;
+          
+          // Create the new combined text
+          const newText = 
+            currentText.substring(0, insertPosition) + 
+            newTextToAppend + 
+            currentText.substring(insertPosition);
+          
+          // Update textarea value
+          setTextAreaContent(newText);
+          
+          // Move cursor to the end of the inserted text
+          const newPosition = insertPosition + newTextToAppend.length;
+          
+          // Set cursor position after the component updates
+          setTimeout(() => {
+            if (textareaRef.current) {
+              textareaRef.current.focus();
+              textareaRef.current.setSelectionRange(newPosition, newPosition);
+              setCursorPosition(newPosition);
+            }
+          }, 0);
+          
+          addDebugInfo(`New text "${newTextToAppend}" appended at position ${insertPosition}`);
+        }
       }
     }
-  }, [transcript, isListening, addDebugInfo, lastTranscriptLength]);
+  }, [transcript, isListening, textAreaContent, cursorPosition, previousTranscript, addDebugInfo]);
 
   return (
     <Card className="w-full">
@@ -164,7 +190,7 @@ const SpeechRecognitionPanel: React.FC<SpeechRecognitionPanelProps> = ({
             onClick={() => {
               onClear();
               setTextAreaContent('');
-              setLastTranscriptLength(0);
+              setPreviousTranscript('');
             }} 
             variant="outline"
           >

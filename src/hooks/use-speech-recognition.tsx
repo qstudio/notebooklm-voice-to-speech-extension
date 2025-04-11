@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 
 interface SpeechRecognitionHook {
@@ -80,7 +79,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
         let currentTranscript = '';
         
-        // Collect only the final results to avoid duplicates
+        // Collect all results to create complete transcript
         for (let i = 0; i < event.results.length; i++) {
           // Take the first alternative from each result
           currentTranscript += event.results[i][0].transcript;
@@ -137,8 +136,6 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       try {
         // Reset any previous errors
         setError(null);
-        // Reset transcript when starting new recording
-        setTranscript('');
         
         // Set language if provided
         if (language) {
