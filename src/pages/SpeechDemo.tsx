@@ -11,6 +11,8 @@ import { useToast } from '@/components/ui/use-toast';
 const SpeechDemo: React.FC = () => {
   const [language, setLanguage] = useState('en-US');
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const { toast } = useToast();
   
   const { 
@@ -44,9 +46,34 @@ const SpeechDemo: React.FC = () => {
       stopListening();
       addDebugInfo('Recording stopped');
     } else {
+      // Focus the textarea and save cursor position before starting recording
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        setCursorPosition(textareaRef.current.selectionStart);
+      }
       resetTranscript();
       startListening(language);
       addDebugInfo(`Recording started with language: ${language}`);
+    }
+  };
+
+  // Handle textarea interaction (keydown, mousedown, paste)
+  const handleTextareaInteraction = () => {
+    if (isListening) {
+      stopListening();
+      addDebugInfo('Recording stopped due to user interaction with textarea');
+    }
+    
+    // Save cursor position for future recording
+    if (textareaRef.current) {
+      setCursorPosition(textareaRef.current.selectionStart);
+    }
+  };
+
+  // Save cursor position on selection change
+  const handleSelectionChange = () => {
+    if (textareaRef.current) {
+      setCursorPosition(textareaRef.current.selectionStart);
     }
   };
 
@@ -97,10 +124,30 @@ const SpeechDemo: React.FC = () => {
     }
   }, [error]);
 
-  // Log transcript changes
+  // Update textarea with transcript and maintain cursor position
   useEffect(() => {
-    if (isListening && transcript) {
-      addDebugInfo(`Transcript updated (${transcript.length} chars)`);
+    if (isListening && transcript && textareaRef.current) {
+      // Get current text and cursor position
+      const currentText = textareaRef.current.value;
+      const currentPosition = cursorPosition ?? currentText.length;
+      
+      // Insert transcript at cursor position
+      const newText = 
+        currentText.substring(0, currentPosition) + 
+        transcript + 
+        currentText.substring(currentPosition);
+      
+      // Update textarea value
+      textareaRef.current.value = newText;
+      
+      // Move cursor to the end of the inserted text
+      const newPosition = currentPosition + transcript.length;
+      textareaRef.current.setSelectionRange(newPosition, newPosition);
+      
+      // Update cursor position for next insertion
+      setCursorPosition(newPosition);
+      
+      addDebugInfo(`Transcript updated and inserted at position ${currentPosition}`);
     }
   }, [transcript, isListening]);
 
@@ -143,7 +190,8 @@ const SpeechDemo: React.FC = () => {
           <CardHeader>
             <CardTitle>Speech Recognition</CardTitle>
             <CardDescription>
-              Speak into your microphone and see the text appear below
+              Speak into your microphone and see the text appear below.
+              Click or type to edit text manually (this will pause recording).
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -151,10 +199,14 @@ const SpeechDemo: React.FC = () => {
             
             <div className="mt-4">
               <Textarea 
-                placeholder="Transcript will appear here..." 
-                value={transcript} 
-                readOnly 
+                ref={textareaRef}
+                placeholder="Start recording or type here..." 
                 className="min-h-[200px] resize-none"
+                onKeyDown={handleTextareaInteraction}
+                onMouseDown={handleTextareaInteraction}
+                onPaste={handleTextareaInteraction}
+                onClick={handleTextareaInteraction}
+                onSelect={handleSelectionChange}
               />
             </div>
           </CardContent>
@@ -174,10 +226,14 @@ const SpeechDemo: React.FC = () => {
               )}
             </Button>
             <div className="space-x-2">
-              <Button onClick={handleClear} variant="outline" disabled={!transcript}>
+              <Button onClick={handleClear} variant="outline">
                 Clear
               </Button>
-              <Button onClick={handleCopy} variant="outline" disabled={!transcript}>
+              <Button 
+                onClick={handleCopy} 
+                variant="outline" 
+                disabled={!textareaRef.current?.value}
+              >
                 Copy
               </Button>
             </div>
