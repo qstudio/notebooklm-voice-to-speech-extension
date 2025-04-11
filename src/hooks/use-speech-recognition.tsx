@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 
 interface SpeechRecognitionHook {
@@ -97,20 +96,35 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         
         // Set up event handlers just before starting
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-          // Get the latest result
+          // Get all results
           const results = event.results;
-          let currentTranscript = '';
+          let fullTranscript = '';
           
           // Process all results from the current session
-          for (let i = 0; i < results.length; i++) {
+          for (let i = event.resultIndex; i < results.length; i++) {
             const result = results[i];
+            const transcript = result[0].transcript;
+            
             if (result.isFinal) {
-              currentTranscript += result[0].transcript + ' ';
+              fullTranscript += transcript + ' ';
+            } else {
+              // Include interim results as well
+              fullTranscript += transcript;
             }
           }
           
-          // Trim any extra spaces and set the transcript
-          setTranscript(currentTranscript.trim());
+          // Update the transcript state
+          setTranscript(prevTranscript => {
+            // For the first result, just return the new transcript
+            if (!prevTranscript) return fullTranscript.trim();
+            
+            // Otherwise append only if it's different (to avoid duplication)
+            // This is a simpler approach than before - we're replacing the entire transcript
+            return fullTranscript.trim();
+          });
+          
+          // Log for debugging
+          console.log("Speech recognition result:", fullTranscript);
         };
         
         recognition.onerror = (event: SpeechRecognitionError) => {
@@ -149,11 +163,13 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
         };
         
         recognition.onend = () => {
+          console.log("Speech recognition ended");
           setIsListening(false);
         };
         
         recognition.start();
         setIsListening(true);
+        console.log("Speech recognition started with language:", language || 'en-US');
       } catch (error) {
         console.error('Error starting speech recognition:', error);
         setError('Failed to start speech recognition. Please try again.');
@@ -166,11 +182,13 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     if (recognition && isListening) {
       recognition.stop();
       setIsListening(false);
+      console.log("Speech recognition stopped manually");
     }
   }, [recognition, isListening]);
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
+    console.log("Transcript reset");
   }, []);
 
   return {
