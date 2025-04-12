@@ -1,0 +1,267 @@
+
+/* Speech Recognition CSS */
+
+/* Base Styles */
+:root {
+  --primary: #4285f4;
+  --primary-hover: #3367d6;
+  --destructive: #ea4335;
+  --destructive-hover: #d32f2f;
+  --background: #ffffff;
+  --card-background: #ffffff;
+  --foreground: #1f2937;
+  --muted: #6b7280;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --radius: 0.5rem;
+  --recording-pulse: #ea4335;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: var(--foreground);
+  line-height: 1.5;
+  padding: 1rem;
+}
+
+.speech-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .speech-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Card Styles */
+.speech-card,
+.debug-card {
+  background-color: var(--card-background);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.speech-header,
+.debug-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.speech-header h2,
+.debug-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.speech-description,
+.debug-description {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+.speech-content,
+.debug-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.speech-footer,
+.debug-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Language Selector */
+.language-selector {
+  margin-bottom: 1rem;
+}
+
+.language-selector label {
+  display: block;
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.language-selector select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--input);
+  background-color: var(--background);
+  font-size: 0.875rem;
+}
+
+.language-hint {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Transcription Textarea */
+.transcription-area {
+  flex: 1;
+}
+
+.transcription-textarea {
+  width: 100%;
+  min-height: 200px;
+  resize: none;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--input);
+  background-color: var(--background);
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.transcription-textarea:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Recording Controls */
+.recording-controls {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.secondary-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  height: 2.5rem;
+  padding: 0 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary.recording {
+  background-color: var(--destructive);
+  animation: pulse 1.5s infinite;
+}
+
+.btn-primary.recording:hover {
+  background-color: var(--destructive-hover);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.btn-outline:hover {
+  background-color: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Debug Logs */
+.debug-logs {
+  background-color: #f8f9fa;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  height: 300px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.debug-log-entry {
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.debug-log-entry:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.debug-log-time {
+  color: var(--muted);
+  margin-right: 0.5rem;
+}
+
+/* Animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(234, 67, 53, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(234, 67, 53, 0);
+  }
+}
+
+/* Icons */
+.mic-icon, 
+.trash-icon, 
+.copy-icon {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Recording indicator */
+.recording-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background-color: var(--recording-pulse);
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  animation: pulse 1.5s infinite;
+}
