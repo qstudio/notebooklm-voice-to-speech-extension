@@ -38,7 +38,22 @@ const Index = () => {
               </Button>
             </Link>
           </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-100 flex flex-col items-center">
+          <h2 className="text-lg font-medium mb-3 text-center">Quick Speech-to-Text Test</h2>
+          <p className="text-sm text-muted-foreground mb-5 text-center max-w-md">
+            Quickly test the speech recognition functionality right on this page.
+          </p>
           
+          <div className="flex gap-4 w-full max-w-md">
+            <Link to="/export-demo" className="w-full">
+              <Button variant="secondary" size="lg" className="w-full gap-2 justify-center">
+                <Mic className="h-5 w-5" />
+                Standalone Demo
+              </Button>
+            </Link>
+          </div>
         </div>
         
         <SettingsPanel onSettingsChange={handleSettingsChange} />
